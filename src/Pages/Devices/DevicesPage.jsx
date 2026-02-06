@@ -4,6 +4,7 @@ import { getDevices } from "../../Api/deviceApi";
 import DeviceCard from '../Devices/DeviceCard';
 import { useCompare } from "../Compare/context/CompareContext";
 import { useNavigate } from "react-router-dom";
+import DeviceImage from '../../components/DEviceImage';
 
 const Devices = () => {
   const [devices,setDevices]=useState([]);

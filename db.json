@@ -15,7 +15,7 @@
     "battery": "3900 mAh",
     "charging": "25W Fast Charging",
     "os": "Android 13",
-    "image":"ttps://images.unsplash.com/photo-1661961112951-f8b3d6d2d7f2"
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "2",
@@ -31,7 +31,8 @@
     "camera": "12 MP Dual",
     "battery": "3279 mAh",
     "charging": "20W Fast Charging",
-    "os": "iOS 16"
+    "os": "iOS 16",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "3",
@@ -47,7 +48,8 @@
     "camera": "50 MP Triple",
     "battery": "5000 mAh",
     "charging": "100W SuperVOOC",
-    "os": "OxygenOS 13"
+    "os": "OxygenOS 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "4",
@@ -63,7 +65,8 @@
     "camera": "50 MP",
     "battery": "4355 mAh",
     "charging": "20W Fast Charging",
-    "os": "Android 13"
+    "os": "Android 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "5",
@@ -79,7 +82,8 @@
     "camera": "200 MP Quad",
     "battery": "5000 mAh",
     "charging": "45W Fast Charging",
-    "os": "Android 13"
+    "os": "Android 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "6",
@@ -95,7 +99,8 @@
     "camera": "48 MP Dual",
     "battery": "3349 mAh",
     "charging": "20W Fast Charging",
-    "os": "iOS 17"
+    "os": "iOS 17",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "7",
@@ -111,7 +116,8 @@
     "camera": "48 MP Triple",
     "battery": "3274 mAh",
     "charging": "27W Fast Charging",
-    "os": "iOS 17"
+    "os": "iOS 17",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "8",
@@ -127,7 +133,8 @@
     "camera": "50 MP",
     "battery": "5000 mAh",
     "charging": "80W SuperVOOC",
-    "os": "OxygenOS 13"
+    "os": "OxygenOS 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "9",
@@ -143,7 +150,8 @@
     "camera": "50 MP Triple",
     "battery": "4820 mAh",
     "charging": "120W HyperCharge",
-    "os": "MIUI 14"
+    "os": "MIUI 14",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "10",
@@ -159,7 +167,8 @@
     "camera": "200 MP",
     "battery": "5100 mAh",
     "charging": "67W Fast Charging",
-    "os": "MIUI 14"
+    "os": "MIUI 14",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "11",
@@ -175,7 +184,8 @@
     "camera": "50 MP",
     "battery": "4575 mAh",
     "charging": "27W Fast Charging",
-    "os": "Android 14"
+    "os": "Android 14",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "12",
@@ -191,7 +201,8 @@
     "camera": "50 MP Triple",
     "battery": "5050 mAh",
     "charging": "30W Fast Charging",
-    "os": "Android 14"
+    "os": "Android 14",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "13",
@@ -207,7 +218,8 @@
     "camera": "50 MP Dual",
     "battery": "4700 mAh",
     "charging": "45W Fast Charging",
-    "os": "Nothing OS 2"
+    "os": "Nothing OS 2",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "14",
@@ -223,7 +235,8 @@
     "camera": "50 MP",
     "battery": "4400 mAh",
     "charging": "68W Fast Charging",
-    "os": "Android 13"
+    "os": "Android 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "15",
@@ -239,7 +252,8 @@
     "camera": "50 MP",
     "battery": "5400 mAh",
     "charging": "100W SuperVOOC",
-    "os": "Realme UI 5"
+    "os": "Realme UI 5",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "16",
@@ -255,7 +269,8 @@
     "camera": "50 MP",
     "battery": "5000 mAh",
     "charging": "25W Fast Charging",
-    "os": "Android 13"
+    "os": "Android 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "17",
@@ -271,7 +286,8 @@
     "camera": "12 MP Triple",
     "battery": "4500 mAh",
     "charging": "25W Fast Charging",
-    "os": "Android 13"
+    "os": "Android 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "18",
@@ -287,7 +303,8 @@
     "camera": "50 MP",
     "battery": "6000 mAh",
     "charging": "65W Fast Charging",
-    "os": "Android 13"
+    "os": "Android 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "19",
@@ -303,7 +320,8 @@
     "camera": "48 MP Triple",
     "battery": "5000 mAh",
     "charging": "30W Fast Charging",
-    "os": "Android 13"
+    "os": "Android 13",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   },
   {
     "id": "20",
@@ -319,7 +337,8 @@
     "camera": "50 MP Zeiss",
     "battery": "5400 mAh",
     "charging": "100W FlashCharge",
-    "os": "Funtouch OS 14"
+    "os": "Funtouch OS 14",
+    "image":"https://img.icons8.com/fluency/480/iphone-x.png"
   }
 ]
 }

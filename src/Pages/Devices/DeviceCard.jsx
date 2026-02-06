@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from "react-router-dom";
+import DeviceImage from "../../components/DeviceImage"
 
 const DeviceCard = ({device,isSelected,onToggleCompare}) => {
     const navigate = useNavigate();
@@ -11,6 +12,8 @@ const DeviceCard = ({device,isSelected,onToggleCompare}) => {
 
   return (
     <div onClick={() =>  navigate(`/devices/${id}`)} className='p-6 rounded-lg bg-slate-800 border border-slate-700 transition hover:border-sky-400/40'>
+        <DeviceImage src={device.image} alt={`${device.brand} ${device.model}`} variant="card"/>
+
         <h3 className='text-lg font-semibold text-slate-50'>
             {brand} {model}
         </h3>

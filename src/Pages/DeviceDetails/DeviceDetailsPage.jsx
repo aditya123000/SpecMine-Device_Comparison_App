@@ -4,7 +4,7 @@ import { getDeviceById } from "../services/deviceServices";
 import { useCompare } from ".././Compare/context/CompareContext";
 import Spinner from "../../components/Global-components/Spinner";
 import { Navigate } from "react-router-dom";
-
+import DeviceImage from "@/components/DeviceImage";
 
 const DeviceDetailsPage = () => {
   console.log("🔥 DeviceDetailsPage rendered");
@@ -43,6 +43,8 @@ const DeviceDetailsPage = () => {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
+          <DeviceImage src={device.image} alt={`${device.brand} ${device.model}`} variant="details" className="mx-auto"/>
+
           <h1 className="text-2xl font-bold text-slate-100">
             {device.brand} {device.model}
           </h1>
