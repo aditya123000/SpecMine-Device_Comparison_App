@@ -16,7 +16,7 @@ const Compare = () => {
           Compare Devices
         </h1>
         <p className="mt-2 text-slate-400 max-w-xl">
-          Select two or more devices to compare their specifications side by side.
+          Select devices to compare their specifications side by side.
         </p>
       </section>
 
