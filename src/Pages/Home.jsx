@@ -1,15 +1,26 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {FiActivity,FiArrowRight,FiBarChart2,FiCpu,FiShield,FiSmartphone,FiZap,} from "react-icons/fi";
 import SearchBar from "../components/Global-components/SearchBar";
 import FeatureCard from "../components/Global-components/FeatureCard";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
   const highlights = [
     { label: "Devices Indexed", value: "500+" },
     { label: "Spec Signals", value: "120+" },
     { label: "Fast Compare", value: "< 2s" },
   ];
+
+  const handleSearchSubmit = (query) => {
+    if (!query) {
+      navigate("/devices");
+      return;
+    }
+    navigate(`/devices?search=${encodeURIComponent(query)}`);
+  };
 
   return (
     <div className="flex flex-col gap-14 md:gap-16">
@@ -33,7 +44,11 @@ const Home = () => {
               Search models instantly, review detailed specs side-by-side, and pick the right phone based on what actually matters.
             </p>
 
-            <SearchBar />
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={handleSearchSubmit}
+            />
 
             <div className="flex flex-wrap items-center gap-3">
               <Link

@@ -1,5 +1,4 @@
 import React from "react";
-import { FaMobileAlt } from "react-icons/fa";
 
 const sizeClasses = {
   card: "h-36",
