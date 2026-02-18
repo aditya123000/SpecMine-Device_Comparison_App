@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {FiActivity,FiArrowRight,FiBarChart2,FiCpu,FiShield,FiSmartphone,FiZap,} from "react-icons/fi";
 import SearchBar from "../components/Global-components/SearchBar";
 import FeatureCard from "../components/Global-components/FeatureCard";
+import { getDevices } from "../Api/deviceApi";
 
 const Home = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [devices, setDevices] = useState([]);
 
   const highlights = [
     { label: "Devices Indexed", value: "500+" },
@@ -21,6 +23,35 @@ const Home = () => {
     }
     navigate(`/devices?search=${encodeURIComponent(query)}`);
   };
+
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const res = await getDevices();
+        setDevices(res);
+      } catch (error) {
+        console.error("Failed to fetch devices", error.message);
+      }
+    };
+    fetchDevices();
+  }, []);
+
+  const searchSuggestions = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+
+    return devices
+      .filter((device) => {
+        const combined = `${device.brand || ""} ${device.model || ""}`.toLowerCase();
+        return combined.includes(query);
+      })
+      .slice(0, 6)
+      .map((device) => ({
+        id: device.id,
+        label: `${device.brand} ${device.model}`,
+        value: `${device.brand} ${device.model}`,
+      }));
+  }, [devices, searchQuery]);
 
   return (
     <div className="flex flex-col gap-14 md:gap-16">
@@ -48,6 +79,8 @@ const Home = () => {
               value={searchQuery}
               onChange={setSearchQuery}
               onSubmit={handleSearchSubmit}
+              onSuggestionSelect={handleSearchSubmit}
+              suggestions={searchSuggestions}
             />
 
             <div className="flex flex-wrap items-center gap-3">

@@ -5,6 +5,12 @@ import DeviceCard from '../Devices/DeviceCard';
 import { useCompare } from "../Compare/context/CompareContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
+const normalizeText = (text) =>
+  String(text || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
 const Devices = () => {
   const [devices,setDevices]=useState([]);
   const[loading,setLoading]=useState(true);
@@ -12,7 +18,6 @@ const Devices = () => {
   const [searchParams,setSearchParams] = useSearchParams();
   const { selectedDevices,toggleCompare } = useCompare();
   const searchTerm = searchParams.get("search")?.trim() || "";
-
 
   useEffect(()=>{
     const fetchDevices=async()=>{
@@ -34,14 +39,12 @@ const Devices = () => {
   const filteredDevices = useMemo(() => {
     if (!searchTerm) return devices;
 
-    const normalizedSearch = searchTerm.toLowerCase();
+    const normalizedSearch = normalizeText(searchTerm);
     return devices.filter((device) => {
-      const brand = device.brand?.toLowerCase() || "";
-      const model = device.model?.toLowerCase() || "";
-      return (
-        brand.includes(normalizedSearch) ||
-        model.includes(normalizedSearch)
+      const searchableText = normalizeText(
+        `${device.brand || ""} ${device.model || ""}`
       );
+      return searchableText.includes(normalizedSearch);
     });
   }, [devices, searchTerm]);
 
