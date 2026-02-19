@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CompareTable from "../Compare/CompareComponents/CompareTable";
 import { useCompare } from "../Compare/context/CompareContext";
 import { getDevices } from "../../Api/deviceApi";
 
 const Compare = () => {
   const { selectedDevices, toggleCompare } = useCompare();
+  const navigate = useNavigate();
   const [allDevices, setAllDevices] = useState([]);
   const [query, setQuery] = useState("");
 
   const canCompare = selectedDevices.length >= 2;
+  const singleSelectedDevice = selectedDevices.length === 1 ? selectedDevices[0] : null;
 
   useEffect(() => {
     const loadDevices = async () => {
@@ -61,6 +63,19 @@ const Compare = () => {
               Search and add devices directly from here, or browse the full list on the Devices page.
             </p>
           </div>
+
+          {singleSelectedDevice && (
+            <button
+              type="button"
+              onClick={() => navigate(`/devices/${singleSelectedDevice.id}`)}
+              className="mt-4 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-4 py-3 text-left transition hover:border-sky-400/40"
+            >
+              <p className="text-xs uppercase tracking-wide text-slate-400">Selected device</p>
+              <p className="mt-1 text-sm font-semibold text-slate-200">
+                {singleSelectedDevice.brand} {singleSelectedDevice.model}
+              </p>
+            </button>
+          )}
 
           <div className="mt-5">
             <input
