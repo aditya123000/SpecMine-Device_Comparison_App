@@ -59,10 +59,10 @@ const DeviceDetailsPage = () => {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
-      <section className="grid gap-8 rounded-2xl border border-slate-700/80 bg-slate-800/40 p-6 md:p-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+      <section className="grid gap-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700/80 dark:bg-slate-800/40 md:p-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full border border-slate-600 px-3 py-1 text-xs text-slate-300">
+            <span className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 dark:border-slate-600 dark:text-slate-300">
               {device.brand}
             </span>
             <span
@@ -77,7 +77,7 @@ const DeviceDetailsPage = () => {
           </div>
 
           <div>
-            <h1 className="text-3xl font-bold text-slate-100 md:text-4xl">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 md:text-4xl">
               {device.brand} {device.model}
             </h1>
             <p className="mt-2 text-2xl font-semibold text-sky-300">
@@ -87,9 +87,9 @@ const DeviceDetailsPage = () => {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {basicDetails.map((item) => (
-              <div key={item.label} className="border-l-2 border-slate-600 pl-3">
-                <p className="text-xs uppercase tracking-wide text-slate-400">{item.label}</p>
-                <p className="mt-1 text-sm font-medium text-slate-100">{item.value}</p>
+              <div key={item.label} className="border-l-2 border-slate-300 pl-3 dark:border-slate-600">
+                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">{item.label}</p>
+                <p className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">{item.value}</p>
               </div>
             ))}
           </div>
@@ -100,15 +100,15 @@ const DeviceDetailsPage = () => {
               disabled={!canSelectMore}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
                 isSelectedForCompare
-                  ? "bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
-                  : "bg-sky-500/15 text-sky-200 hover:bg-sky-500/25"
+                  ? "bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 dark:text-rose-300"
+                  : "bg-sky-500/15 text-sky-700 hover:bg-sky-500/25 dark:text-sky-200"
               } ${!canSelectMore ? "cursor-not-allowed opacity-50" : ""}`}
             >
               {isSelectedForCompare ? "Remove from Compare" : "Add to Compare"}
             </button>
             <button
               onClick={() => navigate(-1)}
-              className="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
             >
               Back
             </button>
@@ -125,13 +125,13 @@ const DeviceDetailsPage = () => {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-700/80 bg-slate-900/40 p-5 md:p-6">
-        <h2 className="text-xl font-semibold text-slate-100">Technical Specifications</h2>
-        <div className="mt-5 divide-y divide-slate-800">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700/80 dark:bg-slate-900/40 md:p-6">
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Technical Specifications</h2>
+        <div className="mt-5 divide-y divide-slate-200 dark:divide-slate-800">
           {specs.map(([key, value]) => (
             <div key={key} className="grid gap-2 py-3 md:grid-cols-[200px_1fr] md:gap-4">
-              <p className="text-sm text-slate-400">{formatLabel(key)}</p>
-              <p className="text-sm font-medium text-slate-200">{value}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{formatLabel(key)}</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{value}</p>
             </div>
           ))}
         </div>

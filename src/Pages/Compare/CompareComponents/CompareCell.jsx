@@ -6,13 +6,13 @@ const CompareCell = ({ device, spec, isBest }) => {
   const rawValue = getSpecValue(device, spec);
   const formatted = normalizeSpecValue(spec, rawValue);
 
-  const baseClass ="p-4 text-center border-l border-slate-700 transition";
+  const baseClass ="p-4 text-center border-l border-slate-300 transition dark:border-slate-700";
 
   const emphasisClass = spec==="Availability"
-    ? "text-slate-300"
+    ? "text-slate-700 dark:text-slate-300"
     : isBest
-    ? "bg-emerald-500/10 text-emerald-300 font-semibold"
-    : "text-slate-400";
+    ? "bg-emerald-500/10 text-emerald-600 font-semibold dark:text-emerald-300"
+    : "text-slate-600 dark:text-slate-400";
 
   if (formatted.type === "availability") {
     return (

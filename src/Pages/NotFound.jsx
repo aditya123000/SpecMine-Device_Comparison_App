@@ -9,11 +9,11 @@ const NotFound = () => {
     <div className="min-h-[70vh] flex flex-col items-center justify-center text-center space-y-4">
       <FaTriangleExclamation className="text-sky-400 text-5xl" />
 
-      <h1 className="text-3xl font-bold text-slate-100">
+      <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
         Page not found
       </h1>
 
-      <p className="text-slate-400 max-w-md">
+      <p className="max-w-md text-slate-600 dark:text-slate-400">
         The page or resource you are trying to access does not exist.
       </p>
 

@@ -13,7 +13,7 @@ const DeviceCard = ({ device, isSelected, onToggleCompare }) => {
   return (
     <article
       onClick={() => navigate(`/devices/${id}`)}
-      className="group rounded-xl border border-slate-700/80 bg-slate-800/40 p-4 transition hover:border-sky-400/40"
+      className="group rounded-xl border border-slate-200 bg-white p-4 transition hover:border-sky-400/40 dark:border-slate-700/80 dark:bg-slate-800/40"
     >
       <DeviceImage
         src={device.image}
@@ -22,13 +22,13 @@ const DeviceCard = ({ device, isSelected, onToggleCompare }) => {
         className="h-28"
       />
 
-      <h3 className="mt-2 text-base font-semibold text-slate-50">
+      <h3 className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-50">
         {brand} {model}
       </h3>
 
       <div className="mt-2 flex items-center justify-between">
         {price !== undefined ? (
-          <p className="text-sm text-slate-300">Rs {price}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300">Rs {price}</p>
         ) : (
           <span />
         )}
@@ -50,8 +50,8 @@ const DeviceCard = ({ device, isSelected, onToggleCompare }) => {
         }}
         className={`mt-4 w-full rounded-md py-2 text-sm font-medium transition ${
           isSelected
-            ? "bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
-            : "bg-sky-500/10 text-sky-300 hover:bg-sky-500/20"
+            ? "bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 dark:text-rose-300"
+            : "bg-sky-500/10 text-sky-600 hover:bg-sky-500/20 dark:text-sky-300"
         }`}
       >
         {isSelected ? "Remove from Compare" : "Add to Compare"}

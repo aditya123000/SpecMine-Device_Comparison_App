@@ -10,7 +10,7 @@ const CompareTable = () => {
 
   if (!selectedDevices.length) {
     return (
-      <div className="text-center py-12 text-slate-400">
+      <div className="py-12 text-center text-slate-600 dark:text-slate-400">
         Select devices to compare
       </div>
     );
@@ -22,7 +22,7 @@ const CompareTable = () => {
 
   return (
     <section className="overflow-x-auto">
-      <div className="border border-slate-700 rounded-lg overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-slate-300 dark:border-slate-700">
         <CompareHeader
           devices={selectedDevices}
           gridTemplate={gridTemplate}

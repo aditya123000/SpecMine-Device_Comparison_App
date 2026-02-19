@@ -12,8 +12,8 @@ const CompareRow = ({ spec, devices, gridTemplate }) => {
   const bestIndices = getBestIndices(spec, values);
 
   return (
-    <div className="grid border-b border-slate-700" style={gridTemplate}>
-      <div className="p-4 font-medium bg-slate-900 sticky left-0 z-10">
+    <div className="grid border-b border-slate-300 dark:border-slate-700" style={gridTemplate}>
+      <div className="sticky left-0 z-10 bg-slate-50 p-4 font-medium text-slate-800 dark:bg-slate-900 dark:text-slate-200">
         {spec}
       </div>
 
