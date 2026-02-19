@@ -1,15 +1,26 @@
-import { SPEC_KEY_MAP } from "./specConfig";
+import { SPEC_KEY_MAP, SPEC_ORDER } from "./specConfig";
+
+const hasComparableValue = (device, key) => {
+  const value = device?.[key];
+  return value !== undefined && value !== null && value !== "";
+};
 
 export const extractSpecs = (devices) => {
   if (!devices || devices.length === 0) return [];
 
-  return Object.keys(SPEC_KEY_MAP).filter((specLabel) => {
+  const orderedSpecs = SPEC_ORDER.filter((specLabel) => {
     const deviceKey = SPEC_KEY_MAP[specLabel];
-
-    return devices.some(
-      (device) => device[deviceKey] !== undefined
-    );
+    return devices.some((device) => hasComparableValue(device, deviceKey));
   });
+
+  const additionalSpecs = Object.keys(SPEC_KEY_MAP).filter((specLabel) => {
+    if (orderedSpecs.includes(specLabel)) return false;
+
+    const deviceKey = SPEC_KEY_MAP[specLabel];
+    return devices.some((device) => hasComparableValue(device, deviceKey));
+  });
+
+  return [...orderedSpecs, ...additionalSpecs];
 };
 
 export const getSpecValue = (device, spec) => {
@@ -18,9 +29,7 @@ export const getSpecValue = (device, spec) => {
     return device[mappedKey];
   }
 
-  const key = Object.keys(device).find(
-    k => k.toLowerCase() === spec.toLowerCase()
-  );
+  const key = Object.keys(device).find((k) => k.toLowerCase() === spec.toLowerCase());
 
   return key ? device[key] : "—";
 };
