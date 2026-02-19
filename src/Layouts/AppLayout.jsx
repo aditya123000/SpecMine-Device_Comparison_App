@@ -1,12 +1,15 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { CompareProvider } from "../Pages/Compare/context/CompareContext";
+import { ThemeProvider } from "../context/ThemeContext";
 
 const AppLayout = () => {
   return (
-    <CompareProvider>
-      <Outlet />
-    </CompareProvider>
+    <ThemeProvider>
+      <CompareProvider>
+        <Outlet />
+      </CompareProvider>
+    </ThemeProvider>
   );
 };
 

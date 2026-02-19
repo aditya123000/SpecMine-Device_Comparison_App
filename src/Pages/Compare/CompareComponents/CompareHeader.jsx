@@ -7,17 +7,17 @@ const CompareHeader = ({ devices, gridTemplate }) => {
 
   return (
     <div
-      className="grid border-b border-slate-700 bg-slate-800 sticky top-0 z-20"
+      className="sticky top-0 z-20 grid border-b border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800"
       style={gridTemplate}
     >
-      <div className="p-4 text-slate-400 text-sm uppercase sticky left-0 bg-slate-800 z-30">
+      <div className="sticky left-0 z-30 bg-slate-100 p-4 text-sm uppercase text-slate-500 dark:bg-slate-800 dark:text-slate-400">
         Specifications
       </div>
 
       {devices.map((device) => (
         <div
           key={device.id}
-          className="relative p-4 text-center font-semibold border-l border-slate-700"
+          className="relative border-l border-slate-300 p-4 text-center font-semibold text-slate-900 dark:border-slate-700 dark:text-slate-100"
         >
           <div className="absolute right-2 top-2">
             <RemoveDeviceButton
