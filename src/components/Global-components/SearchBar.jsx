@@ -15,7 +15,7 @@ const SearchBar = ({
   const inputValue = isControlled ? value : internalValue;
   const normalizedInput = inputValue.trim();
   const visibleSuggestions = useMemo(
-    () => (normalizedInput ? suggestions.slice(0, 6) : []),
+    () => (normalizedInput ? suggestions : []),
     [normalizedInput, suggestions]
   );
 
@@ -57,7 +57,7 @@ const SearchBar = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-xl">
+    <form onSubmit={handleSubmit} className="relative w-full max-w-xl">
       <div className="relative">
         <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
         <input
@@ -72,7 +72,7 @@ const SearchBar = ({
         />
       </div>
       {showSuggestions && visibleSuggestions.length > 0 && (
-        <ul className="mt-2 overflow-hidden rounded-lg border border-slate-300 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900/95">
+        <ul className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-lg border border-slate-300 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900/95">
           {visibleSuggestions.map((suggestion) => {
             const key = typeof suggestion === "string" ? suggestion : suggestion.id;
             const label = typeof suggestion === "string" ? suggestion : suggestion.label;

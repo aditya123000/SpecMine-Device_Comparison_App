@@ -45,7 +45,6 @@ const Home = () => {
         const combined = `${device.brand || ""} ${device.model || ""}`.toLowerCase();
         return combined.includes(query);
       })
-      .slice(0, 6)
       .map((device) => ({
         id: device.id,
         label: `${device.brand} ${device.model}`,
@@ -55,7 +54,7 @@ const Home = () => {
 
   return (
     <div className="flex flex-col gap-14 md:gap-16">
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-slate-100 p-6 dark:border-slate-700/70 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 md:p-10">
+      <section className="relative overflow-visible rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-slate-100 p-6 dark:border-slate-700/70 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 md:p-10">
         <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-sky-400/20 blur-3xl" />
         <div className="pointer-events-none absolute -right-20 top-1/3 h-56 w-56 rounded-full bg-cyan-300/10 blur-3xl" />
 
