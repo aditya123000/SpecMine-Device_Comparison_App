@@ -9,6 +9,7 @@ import {
   filterDevicesBySection,
   getSectionMeta,
 } from "./deviceSections";
+import { applyDeviceFilters, getUniqueBrands } from "./deviceFilters";
 
 const normalizeText = (text) =>
   String(text || "")
@@ -24,6 +25,12 @@ const getSectionLinkClass = ({ isActive }) =>
 const DevicesPage = ({ sectionKey = "phones" }) => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    availability: "all",
+    brand: "all",
+    maxPrice: "",
+    minRam: "",
+  });
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { selectedDevices, toggleCompare } = useCompare();
@@ -50,7 +57,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
     [devices, sectionKey]
   );
 
-  const filteredDevices = useMemo(() => {
+  const searchedDevices = useMemo(() => {
     if (!searchTerm) return sectionDevices;
 
     const normalizedSearch = normalizeText(searchTerm);
@@ -59,6 +66,24 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
       return searchableText.includes(normalizedSearch);
     });
   }, [sectionDevices, searchTerm]);
+
+  const availableBrands = useMemo(() => getUniqueBrands(sectionDevices), [sectionDevices]);
+
+  const filteredDevices = useMemo(
+    () => applyDeviceFilters(searchedDevices, filters),
+    [searchedDevices, filters]
+  );
+
+  const activeFilterCount = useMemo(
+    () =>
+      ["availability", "brand", "maxPrice", "minRam"].filter((key) => {
+        if (key === "availability" || key === "brand") {
+          return filters[key] !== "all";
+        }
+        return String(filters[key]).trim() !== "";
+      }).length,
+    [filters]
+  );
 
   if (loading) {
     return <Spinner loading={loading} />;
@@ -78,30 +103,24 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
   return (
     <div className="flex flex-col gap-7">
       <section className="space-y-4 border-b border-slate-300 pb-5 dark:border-slate-800">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50 md:text-3xl">
-              Devices - {activeSection.label}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-              {activeSection.description}
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50 md:text-3xl">
+            Devices - {activeSection.label}
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
+            {activeSection.description}
+          </p>
+          {searchTerm && (
+            <p className="mt-2 text-sm text-sky-600 dark:text-sky-300">
+              Search results for "{searchTerm}"
+              <button
+                onClick={() => setSearchParams({})}
+                className="ml-3 text-slate-500 underline underline-offset-4 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                Clear
+              </button>
             </p>
-            {searchTerm && (
-              <p className="mt-2 text-sm text-sky-600 dark:text-sky-300">
-                Search results for "{searchTerm}"
-                <button
-                  onClick={() => setSearchParams({})}
-                  className="ml-3 text-slate-500 underline underline-offset-4 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                >
-                  Clear
-                </button>
-              </p>
-            )}
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1.5 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-300">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">{filteredDevices.length}</span>
-            {searchTerm ? `of ${sectionDevices.length} shown` : `${activeSection.label.toLowerCase()} listed`}
-          </div>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -115,6 +134,97 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
               {section.label}
             </NavLink>
           ))}
+        </div>
+
+        <div className="rounded-xl border border-slate-300 bg-white/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end">
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">
+                Availability
+              </label>
+              <select
+                value={filters.availability}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, availability: e.target.value }))
+                }
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              >
+                <option value="all">All</option>
+                <option value="available">In stock</option>
+                <option value="unavailable">Out of stock</option>
+              </select>
+            </div>
+
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">
+                Brand
+              </label>
+              <select
+                value={filters.brand}
+                onChange={(e) => setFilters((prev) => ({ ...prev, brand: e.target.value }))}
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              >
+                <option value="all">All brands</option>
+                {availableBrands.map((brand) => (
+                  <option key={brand} value={brand}>
+                    {brand}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">
+                Max price (Rs)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={filters.maxPrice}
+                onChange={(e) => setFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
+                placeholder="e.g. 80000"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              />
+            </div>
+
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">
+                Min RAM
+              </label>
+              <select
+                value={filters.minRam}
+                onChange={(e) => setFilters((prev) => ({ ...prev, minRam: e.target.value }))}
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              >
+                <option value="">Any</option>
+                <option value="4">4 GB+</option>
+                <option value="6">6 GB+</option>
+                <option value="8">8 GB+</option>
+                <option value="12">12 GB+</option>
+                <option value="16">16 GB+</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Filter devices based on your specific needs.
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                setFilters({
+                  availability: "all",
+                  brand: "all",
+                  maxPrice: "",
+                  minRam: "",
+                })
+              }
+              className="text-xs font-semibold text-sky-700 underline underline-offset-4 hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-200"
+            >
+              Clear filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -140,7 +250,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
               No devices matched in {activeSection.label}.
             </p>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Try another category or search by a different brand/model.
+              Try adjusting your filters, category, or search term.
             </p>
           </div>
         ) : (
