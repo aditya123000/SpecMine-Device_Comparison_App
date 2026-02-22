@@ -5,10 +5,23 @@ import SearchBar from "../components/Global-components/SearchBar";
 import FeatureCard from "../components/Global-components/FeatureCard";
 import { getDevices } from "../Api/deviceApi";
 
+const DEVICE_TYPES = [
+  "smartphones",
+  "laptops",
+  "tablets",
+  "earbuds",
+  "headphones",
+  "smart TVs",
+  "smartwatches",
+  "gaming consoles",
+  "monitors",
+];
+
 const Home = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [devices, setDevices] = useState([]);
+  const [activeDeviceTypeIndex, setActiveDeviceTypeIndex] = useState(0);
 
   const highlights = [
     { label: "Devices Indexed", value: "500+" },
@@ -34,6 +47,14 @@ const Home = () => {
       }
     };
     fetchDevices();
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setActiveDeviceTypeIndex((prev) => (prev + 1) % DEVICE_TYPES.length);
+    }, 1700);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const searchSuggestions = useMemo(() => {
@@ -65,13 +86,21 @@ const Home = () => {
               Smarter device decisions
             </span>
 
-            <h1 className="text-3xl font-bold leading-tight text-slate-900 dark:text-slate-50 md:text-5xl">
-              Compare smartphones with
-              <span className="block text-sky-600 dark:text-sky-300">clarity, speed, and confidence</span>
+            <h1 className="text-3xl font-bold leading-tight text-white md:text-5xl">
+              <span className="block">
+                Compare{" "}
+                <span
+                  key={DEVICE_TYPES[activeDeviceTypeIndex]}
+                  className="inline-block text-sky-600 animate-word-cycle dark:text-sky-300"
+                >
+                  {DEVICE_TYPES[activeDeviceTypeIndex]}
+                </span>
+              </span>
+              <span className="block text-white">with clarity, speed, and confidence</span>
             </h1>
 
             <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300 md:text-lg">
-              Search models instantly, review detailed specs side-by-side, and pick the right phone based on what actually matters.
+              Search models instantly, review detailed specs side-by-side, and pick the right device based on what actually matters.
             </p>
 
             <SearchBar

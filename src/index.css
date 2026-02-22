@@ -16,3 +16,19 @@
 .animate-fade-in {
   animation: fadeIn 0.25s ease-out;
 }
+
+@keyframes wordCycleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-word-cycle {
+  animation: wordCycleIn 0.35s ease-out;
+  will-change: transform, opacity;
+}
