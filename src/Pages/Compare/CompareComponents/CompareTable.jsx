@@ -1,5 +1,5 @@
 import React from "react";
-import { useCompare } from "../context/CompareContext";
+import { useCompare } from "../context/useCompare";
 import { useCompareSpecs } from "../CompareLogic/useCompareSpecs";
 import CompareHeader from "./CompareHeader";
 import CompareRow from "./CompareRow";

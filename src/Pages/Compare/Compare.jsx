@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CompareTable from "../Compare/CompareComponents/CompareTable";
-import { useCompare } from "../Compare/context/CompareContext";
+import { useCompare } from "../Compare/context/useCompare";
 import { getDevices } from "../../Api/deviceApi";
 
 const Compare = () => {

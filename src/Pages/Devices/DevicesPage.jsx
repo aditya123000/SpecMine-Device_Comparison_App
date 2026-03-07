@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import Spinner from "../../components/Global-components/Spinner";
 import { getDevices } from "../../Api/deviceApi";
 import DeviceCard from "./DeviceCard";
-import { useCompare } from "../Compare/context/CompareContext";
+import { useCompare } from "../Compare/context/useCompare";
 import {
   DEVICE_SECTIONS,
   filterDevicesBySection,

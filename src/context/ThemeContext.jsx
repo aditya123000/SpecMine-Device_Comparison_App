@@ -1,6 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
-
-const ThemeContext = createContext();
+import { useEffect, useState } from "react";
+import { ThemeContext } from "./ThemeContextObject";
 const STORAGE_KEY = "theme";
 
 export const ThemeProvider = ({ children }) => {
@@ -29,5 +28,3 @@ export const ThemeProvider = ({ children }) => {
 
   return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 };
-
-export const useTheme = () => useContext(ThemeContext);

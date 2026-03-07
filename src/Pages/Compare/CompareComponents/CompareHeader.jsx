@@ -1,5 +1,5 @@
 import React from "react";
-import { useCompare } from "../context/CompareContext";
+import { useCompare } from "../context/useCompare";
 import RemoveDeviceButton from "./RemoveDeviceButton";
 
 const CompareHeader = ({ devices, gridTemplate }) => {

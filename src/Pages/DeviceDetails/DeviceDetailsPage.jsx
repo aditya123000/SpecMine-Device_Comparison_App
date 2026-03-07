@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import DeviceImage from "@/components/DeviceImage";
 import Spinner from "../../components/Global-components/Spinner";
-import { useCompare } from "../Compare/context/CompareContext";
+import { useCompare } from "../Compare/context/useCompare";
 import { getDeviceById } from "../services/deviceServices";
 
 const EXCLUDED_SPEC_KEYS = ["id", "brand", "model", "price", "available", "image"];
