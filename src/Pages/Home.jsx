@@ -86,7 +86,7 @@ const Home = () => {
               Smarter device decisions
             </span>
 
-            <h1 className="text-3xl font-bold leading-tight text-white md:text-5xl">
+            <h1 className="text-3xl font-bold leading-tight text-slate-900 dark:text-white md:text-5xl">
               <span className="block">
                 Compare{" "}
                 <span
@@ -96,7 +96,7 @@ const Home = () => {
                   {DEVICE_TYPES[activeDeviceTypeIndex]}
                 </span>
               </span>
-              <span className="block text-white">with clarity, speed, and confidence</span>
+              <span className="block text-slate-800 dark:text-white">with clarity, speed, and confidence</span>
             </h1>
 
             <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300 md:text-lg">

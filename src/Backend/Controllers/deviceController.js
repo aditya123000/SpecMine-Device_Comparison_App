@@ -12,6 +12,7 @@ const readDevices = async () => {
   return Array.isArray(data.devices) ? data.devices : [];
 };
 
+//Get all devices
 const getDevices = async (req, res, next) => {
   try {
     const devices = await readDevices();
@@ -27,6 +28,7 @@ const getDevices = async (req, res, next) => {
   }
 };
 
+//Get device by id
 const getDeviceById = async (req, res, next) => {
   try {
     const devices = await readDevices();
