@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import CompareTable from "../Compare/CompareComponents/CompareTable";
 import { useCompare } from "../Compare/context/useCompare";
 import { getDevices } from "../../Api/deviceApi";
+import SearchBar from "../../components/Global-components/SearchBar";
 
 const Compare = () => {
   const { selectedDevices, toggleCompare } = useCompare();
@@ -42,6 +43,17 @@ const Compare = () => {
       .slice(0, 8);
   }, [allDevices, query, selectedDevices]);
 
+  const suggestions = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return [];
+
+    return filteredDevices.map((device) => ({
+      id: device.id,
+      label: `${device.brand || ""} ${device.model || ""}`.trim(),
+      value: `${device.brand || ""} ${device.model || ""}`.trim(),
+    }));
+  }, [filteredDevices, query]);
+
   return (
     <div className="flex flex-col gap-10">
       <section>
@@ -78,12 +90,12 @@ const Compare = () => {
           )}
 
           <div className="mt-5">
-            <input
-              type="text"
+            <SearchBar
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={setQuery}
+              onSuggestionSelect={setQuery}
+              suggestions={suggestions}
               placeholder="Search by brand or model"
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-500 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
