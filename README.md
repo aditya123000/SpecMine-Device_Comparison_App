@@ -1,4 +1,4 @@
-SPECMINE
+# SpecMine
 
 SpecMine is a modern web application designed to help users search, explore, and compare specifications of electronic devices in a structured and intuitive interface.
 
@@ -6,85 +6,67 @@ The platform aggregates technical specifications of devices such as smartphones,
 
 SpecMine aims to simplify the decision-making process for consumers by presenting clear, organized, and easily comparable device data.
 
-Key Features
-Device Search
+---
 
+## Key Features
+
+### Device Search
 Users can quickly locate devices by searching for brand names, model numbers, or product categories through an interactive search interface.
 
-Multi-Category Device Browsing
-
+### Multi-Category Device Browsing
 Devices are organized into multiple categories for easier navigation:
 
-Smartphones
+- Smartphones  
+- Laptops  
+- Tablets  
+- Earbuds  
+- Headphones  
+- Televisions  
+- Smartwatches  
+- Gaming Consoles  
+- Monitors  
 
-Laptops
+### Structured Device Specifications
+Each device page presents technical specifications in a clean and structured format, including:
 
-Tablets
+- Processor / Chipset
+- RAM and Storage
+- Display characteristics
+- Battery capacity
+- Camera specifications
+- Connectivity features
+- Additional hardware details
 
-Earbuds
-
-Headphones
-
-Televisions
-
-Smartwatches
-
-Gaming Consoles
-
-Monitors
-
-Structured Device Specifications
-
-Each device page presents technical specifications in a clean, structured format, including:
-
-Processor / Chipset
-
-RAM and Storage
-
-Display characteristics
-
-Battery capacity
-
-Camera specifications
-
-Connectivity features
-
-Additional hardware details
-
-Side-by-Side Device Comparison
-
+### Side-by-Side Device Comparison
 Users can compare multiple devices simultaneously to identify differences in specifications such as performance, display quality, battery life, and hardware capabilities.
 
-Responsive User Interface
-
+### Responsive User Interface
 The application features a clean and responsive design built with Tailwind CSS, ensuring a smooth experience across desktop and mobile devices.
 
-Seamless Navigation
-
+### Seamless Navigation
 Routing is handled using React Router, enabling fast page transitions without full page reloads.
 
-Technology Stack
-Frontend
+---
 
-React
+## Technology Stack
 
-Vite
+### Frontend
+- React
+- Vite
+- React Router
+- Tailwind CSS
+- JavaScript (ES6+)
 
-React Router
+### Development Tools
+- ESLint
+- PostCSS
+- Node.js
 
-Tailwind CSS
+---
 
-JavaScript (ES6+)
+## Project Structure
 
-Development Tools
-
-ESLint
-
-PostCSS
-
-Node.js
-
-Project Architecture
+```
 src
 │
 ├── api
@@ -113,81 +95,86 @@ src
 │
 ├── App.jsx
 └── main.jsx
+```
 
-The project follows a component-based architecture, separating concerns into reusable UI components, page views, layout wrappers, and API utilities.
+The project follows a component-based architecture that separates UI components, layouts, page views, and API utilities to maintain scalability and readability.
 
-Installation and Setup
+---
+
+## Installation and Setup
 
 Clone the repository
 
+```bash
 git clone https://github.com/aditya123000/specmine.git
+```
 
 Navigate to the project directory
 
+```bash
 cd specmine
+```
 
 Install dependencies
 
+```bash
 npm install
+```
 
-Start the development server
+Run the development server
 
+```bash
 npm run dev
+```
 
-The application will be available at:
+Open the application at
 
+```
 http://localhost:5173
-Application Workflow
+```
 
-Search for a Device
-Users can search devices using keywords such as brand names or model numbers.
+---
 
-Browse Device Categories
-Devices can be explored through categorized sections.
+## Application Workflow
 
-View Detailed Specifications
-Each device page displays detailed technical specifications.
+1. Search for a device using the search bar  
+2. Browse devices across different categories  
+3. Open device pages to view detailed specifications  
+4. Compare multiple devices side-by-side  
 
-Compare Devices
-Users can select multiple devices and view their specifications side-by-side.
+---
 
-Future Enhancements
+## Future Improvements
 
-Planned improvements include:
+- Backend API for dynamic device data
+- Database integration (MongoDB or PostgreSQL)
+- Advanced filtering (price, RAM, processor, battery)
+- Device reviews and ratings
+- User accounts and saved comparisons
+- Improved visualization for specification comparison
 
-Backend API for dynamic device data
+---
 
-Database integration (MongoDB or PostgreSQL)
+## Learning Objectives
 
-Advanced filtering options (price, RAM, chipset, battery)
+This project was built to strengthen understanding of:
 
-Device reviews and ratings
+- React application architecture
+- Component-based UI design
+- Client-side routing using React Router
+- API-driven data handling
+- Responsive design using Tailwind CSS
+- Modern frontend tooling with Vite
 
-User authentication and saved comparisons
+---
 
-Improved visualization for specification comparisons
-
-Learning Objectives
-
-This project was developed to strengthen knowledge in:
-
-Modern React application architecture
-
-Component-based UI development
-
-Client-side routing with React Router
-
-API-driven data handling
-
-Responsive design using Tailwind CSS
-
-Modern frontend build tooling with Vite
-
-Author
+## Author
 
 Aditya
 
-GitHub
+GitHub:  
 https://github.com/aditya123000
 
-⭐ If you found this project useful, consider starring the repository.
+---
+
+⭐ If you found this project interesting, consider giving it a star.
