@@ -14,3 +14,25 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Backend Postgres Setup
+
+The backend now reads devices from PostgreSQL instead of `src/Backend/Data/db.json`.
+
+1. Copy `src/Backend/.env.example` to `src/Backend/.env`.
+2. Put your Postgres password in `PGPASSWORD`.
+3. Make sure your Postgres server already has a database named `compare_devices`.
+4. Start the backend with `npm run server`.
+
+By default, the backend connects using:
+
+- host: `localhost`
+- port: `5432`
+- database: `compare_devices`
+- user: `postgres`
+
+You only need to override `PGHOST`, `PGPORT`, `PGDATABASE`, or `PGUSER` if your setup is different.
+
+On startup, the backend creates a `devices` table and, if it is empty, imports the records from `src/Backend/Data/db.json`.
+
+If you want to seed manually, run `npm --prefix src/Backend run seed`.
