@@ -65,6 +65,22 @@ const createDevicesTable = async () => {
   `);
 };
 
+const createUsersTable = async () => {
+  await query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id BIGSERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await query(`
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+  `);
+};
+
 const seedDevicesFromJson = async (seedFilePath = defaultSeedFilePath) => {
   const raw = await fs.readFile(seedFilePath, "utf-8");
   const data = JSON.parse(raw);
@@ -99,6 +115,7 @@ const seedDevicesFromJson = async (seedFilePath = defaultSeedFilePath) => {
 
 const initializeDatabase = async () => {
   await createDevicesTable();
+  await createUsersTable();
 
   const shouldAutoSeed = String(process.env.AUTO_SEED_DB ?? "true").toLowerCase() !== "false";
 
@@ -113,4 +130,4 @@ const initializeDatabase = async () => {
   }
 };
 
-export { createDevicesTable, getPool, initializeDatabase, query, seedDevicesFromJson };
+export { createDevicesTable, createUsersTable, getPool, initializeDatabase, query, seedDevicesFromJson };

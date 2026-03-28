@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import deviceRoutes from "./Routes/deviceRoutes.js";
+import authRoutes from "./Routes/authRoutes.js";
 import logger from "./Middleware/logger.js";
 import notFound from "./Middleware/notFound.js";
 import errorHandler from "./Middleware/errorHandler.js";
@@ -12,7 +13,11 @@ dotenv.config();
 const app = express();
 const PORT = Number.parseInt(globalThis.process?.env?.PORT ?? "8000", 10);
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
+  })
+);
 app.use(express.json());
 app.use(logger);
 
@@ -164,6 +169,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/devices", deviceRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

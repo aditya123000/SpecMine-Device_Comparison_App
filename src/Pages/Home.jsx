@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {FiActivity,FiArrowRight,FiBarChart2,FiCpu,FiShield,FiSmartphone,FiZap,} from "react-icons/fi";
+import {FiActivity,FiArrowRight,FiBarChart2,FiCheckCircle,FiCpu,FiLogOut,FiShield,FiSmartphone,FiZap} from "react-icons/fi";
 import SearchBar from "../components/Global-components/SearchBar";
 import FeatureCard from "../components/Global-components/FeatureCard";
 import { getDevices } from "../Api/deviceApi";
+import { useAuth } from "../context/useAuth";
+
+const AUTH_TOAST_STORAGE_KEY = "auth_toast";
 
 const DEVICE_TYPES = [
   "smartphones",
@@ -19,9 +22,11 @@ const DEVICE_TYPES = [
 
 const Home = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [devices, setDevices] = useState([]);
   const [activeDeviceTypeIndex, setActiveDeviceTypeIndex] = useState(0);
+  const [authToast, setAuthToast] = useState(null);
 
   const highlights = [
     { label: "Devices Indexed", value: "500+" },
@@ -57,6 +62,47 @@ const Home = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const storedToast = window.sessionStorage.getItem(AUTH_TOAST_STORAGE_KEY);
+    let remainingDuration = 0;
+    let parsedToast = null;
+
+    if (storedToast) {
+      try {
+        parsedToast = JSON.parse(storedToast);
+        remainingDuration = Math.max(0, (parsedToast?.expiresAt ?? 0) - Date.now());
+      } catch {
+        remainingDuration = 0;
+      }
+    }
+
+    if (remainingDuration <= 0) {
+      setAuthToast(null);
+      window.sessionStorage.removeItem(AUTH_TOAST_STORAGE_KEY);
+      return;
+    }
+
+    setAuthToast({
+      type: parsedToast?.type === "logout" ? "logout" : "login",
+      message:
+        parsedToast?.message ||
+        (parsedToast?.type === "logout"
+          ? "Logged out successfully."
+          : `Logged in as ${user?.name || user?.email || "your account"}.`),
+    });
+
+    const timeoutId = window.setTimeout(() => {
+      setAuthToast(null);
+      window.sessionStorage.removeItem(AUTH_TOAST_STORAGE_KEY);
+    }, remainingDuration);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isAuthenticated, user]);
+
   const searchSuggestions = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return [];
@@ -75,6 +121,25 @@ const Home = () => {
 
   return (
     <div className="flex flex-col gap-14 md:gap-16">
+      {authToast ? (
+        <div className="pointer-events-none fixed left-1/2 top-5 z-50 w-auto min-w-[200px] max-w-sm -translate-x-1/2 px-4 shadow-sm">
+          <div
+            className={`flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-center text-sm font-medium shadow-xl backdrop-blur-sm animate-fade-in ${
+              authToast.type === "logout"
+                ? "border border-amber-200 bg-amber-50/95 text-amber-700 shadow-amber-500/10 dark:border-amber-500/30 dark:bg-slate-900/95 dark:text-amber-300"
+                : "border border-emerald-200 bg-emerald-50/95 text-emerald-700 shadow-emerald-500/10 dark:border-emerald-500/30 dark:bg-slate-900/95 dark:text-emerald-300"
+            }`}
+          >
+            {authToast.type === "logout" ? (
+              <FiLogOut className="text-base text-amber-600 dark:text-amber-400" />
+            ) : (
+              <FiCheckCircle className="text-base text-emerald-600 dark:text-emerald-400" />
+            )}
+            <span>{authToast.message}</span>
+          </div>
+        </div>
+      ) : null}
+
       <section className="relative overflow-visible rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-slate-100 p-6 dark:border-slate-700/70 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 md:p-10">
         <div className="pointer-events-none absolute -left-16 -top-16 h-48 w-48 rounded-full bg-sky-400/20 blur-3xl" />
         <div className="pointer-events-none absolute -right-20 top-1/3 h-56 w-56 rounded-full bg-cyan-300/10 blur-3xl" />
@@ -102,6 +167,23 @@ const Home = () => {
             <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300 md:text-lg">
               Search models instantly, review detailed specs side-by-side, and pick the right device based on what actually matters.
             </p>
+
+            {!isAuthenticated ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white/70 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-sky-400/60 hover:text-sky-700 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100 dark:hover:text-sky-200"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+                >
+                  Register
+                </Link>
+              </div>
+            ) : null}
 
             <SearchBar
               value={searchQuery}

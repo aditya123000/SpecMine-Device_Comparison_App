@@ -12,6 +12,7 @@ import TVsPage from "./Pages/Devices/sections/TVsPage";
 import Compare from "./Pages/Compare/Compare";
 import NotFound from "./Pages/NotFound";
 import DeviceDetailsPage from "./Pages/DeviceDetails/DeviceDetailsPage";
+import AuthPage from "./Pages/Auth/AuthPage";
 
 const router = createBrowserRouter([
   {
@@ -48,9 +49,17 @@ const router = createBrowserRouter([
           path: "/devices/tvs",
           element: <TVsPage />,
         },
-        { 
+        {
           path: "/compare", 
           element: <Compare /> 
+        },
+        {
+          path: "/login",
+          element: <AuthPage mode="login" />,
+        },
+        {
+          path: "/register",
+          element: <AuthPage mode="register" />,
         },
         {
           path:"/devices/:id",

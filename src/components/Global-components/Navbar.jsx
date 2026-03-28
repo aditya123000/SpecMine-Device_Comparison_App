@@ -1,8 +1,10 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
-import { FiMoon, FiSun } from "react-icons/fi";
+import { NavLink, useNavigate } from "react-router-dom";
+import { FiLogOut, FiMoon, FiSun } from "react-icons/fi";
 import { useTheme } from "../../context/useTheme";
+import { useAuth } from "../../context/useAuth";
 
+const AUTH_TOAST_STORAGE_KEY = "auth_toast";
 
 const linkClass=({isActive}) =>
   isActive
@@ -10,7 +12,25 @@ const linkClass=({isActive}) =>
     : "text-slate-700 hover:text-sky-600 dark:text-slate-300 dark:hover:text-sky-300";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { isAuthenticated, logout, user } = useAuth();
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(
+        AUTH_TOAST_STORAGE_KEY,
+        JSON.stringify({
+          type: "logout",
+          message: `Logged out${user?.name ? `, ${user.name}` : ""}.`,
+          expiresAt: Date.now() + 2500,
+        }),
+      );
+    }
+
+    logout();
+    navigate("/");
+  };
 
   return (
     <nav className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -33,6 +53,21 @@ const Navbar = () => {
           <NavLink to="/" end className={linkClass}>Home</NavLink>
           <NavLink to="/devices" end className={linkClass}>Devices</NavLink>
           <NavLink to="/compare" end className={linkClass}>Compare</NavLink>
+          {isAuthenticated ? (
+            <>
+              <span className="hidden text-sm text-slate-600 dark:text-slate-300 md:inline">
+                {user?.name}
+              </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 transition hover:border-sky-400 hover:text-sky-600 dark:border-slate-600 dark:text-slate-200 dark:hover:text-sky-300"
+              >
+                Logout
+                <FiLogOut className="text-sm" />
+              </button>
+            </>
+          ) : null}
           <button
             type="button"
             onClick={toggleTheme}

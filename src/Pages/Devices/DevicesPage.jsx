@@ -25,6 +25,7 @@ const getSectionLinkClass = ({ isActive }) =>
 const DevicesPage = ({ sectionKey = "phones" }) => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [filters, setFilters] = useState({
     availability: "all",
     brand: "all",
@@ -42,8 +43,10 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
       try {
         const res = await getDevices();
         setDevices(res);
+        setLoadError("");
       } catch (error) {
         console.error("Failed to fetch Devices", error.message);
+        setLoadError("Could not load devices from the backend. Make sure the API server is running on port 8000.");
       } finally {
         setLoading(false);
       }
@@ -87,6 +90,15 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
 
   if (loading) {
     return <Spinner loading={loading} />;
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-center">
+        <p className="text-lg font-medium text-slate-700 dark:text-slate-200">Unable to load devices</p>
+        <p className="mt-1 max-w-lg text-sm text-slate-500 dark:text-slate-400">{loadError}</p>
+      </div>
+    );
   }
 
   if (devices.length === 0) {

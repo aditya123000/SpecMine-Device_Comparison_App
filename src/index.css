@@ -32,3 +32,37 @@
   animation: wordCycleIn 0.35s ease-out;
   will-change: transform, opacity;
 }
+
+.auth-input {
+  color: rgb(15 23 42);
+  caret-color: rgb(2 132 199);
+}
+
+.auth-input::placeholder {
+  color: rgb(148 163 184);
+}
+
+.dark .auth-input {
+  color: rgb(241 245 249);
+}
+
+.dark .auth-input::placeholder {
+  color: rgb(148 163 184);
+}
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+  -webkit-text-fill-color: rgb(15 23 42);
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark .auth-input:-webkit-autofill,
+.dark .auth-input:-webkit-autofill:hover,
+.dark .auth-input:-webkit-autofill:focus,
+.dark .auth-input:-webkit-autofill:active {
+  -webkit-text-fill-color: rgb(241 245 249);
+  -webkit-box-shadow: 0 0 0 1000px rgba(15, 23, 42, 0) inset;
+}
