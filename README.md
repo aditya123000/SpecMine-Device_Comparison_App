@@ -1,38 +1,73 @@
-# React + Vite
+# SpecMine
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SpecMine is a modern, comprehensive web application designed to help users intelligently search, explore, and compare the technical specifications of electronic devices. It bridges the gap between complex hardware details and a user-friendly interface, simplifying the consumer decision-making process.
 
-Currently, two official plugins are available:
+## Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Advanced Device Search:** Quickly locate specific devices by brand name, model number, or product category using our interactive search interface.
+- **Multi-Category Browsing:** Seamlessly navigate through diverse categories, including Smartphones, Laptops, Tablets, Earbuds, Headphones, Televisions, Smartwatches, Gaming Consoles, and Monitors.
+- **Side-by-Side Comparisons:** Evaluate multiple devices simultaneously to directly compare performance capabilities, display quality, battery life, and other critical hardware metrics.
+- **Detailed Specifications:** Access highly structured data for every device, covering Processor/Chipset, RAM/Storage, Display, Battery, Camera, and Connectivity features.
+- **User Authentication:** Create a personalized account to save your place and ensure a tailored comparison experience.
+- **Responsive Design:** A beautifully crafted, Tailwind-powered user interface that ensures a flawless experience on both desktop and mobile devices.
 
-## React Compiler
+## Technology Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Frontend:**
+- React (bootstrapped with Vite)
+- React Router (for seamless client-side routing)
+- Tailwind CSS
 
-## Expanding the ESLint configuration
+**Backend & Database:**
+- Node.js & Express
+- PostgreSQL
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Getting Started
 
-## Backend Postgres Setup
+### Prerequisites
+- Node.js (v16+ recommended)
+- PostgreSQL (Ensure you have a local database named `compare_devices` ready)
 
-The backend now reads devices from PostgreSQL instead of `src/Backend/Data/db.json`.
+### Installation
 
-1. Copy `src/Backend/.env.example` to `src/Backend/.env`.
-2. Put your Postgres password in `PGPASSWORD`.
-3. Make sure your Postgres server already has a database named `compare_devices`.
-4. Start the backend with `npm run server`.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/aditya123000/specmine.git
+   cd specmine
+   ```
 
-By default, the backend connects using:
+2. **Backend Setup:**
+   - Define your environment variables by copying the example file:
+     ```bash
+     cp src/Backend/.env.example src/Backend/.env
+     ```
+   - Update `src/Backend/.env` with your PostgreSQL credentials (specifically, set `PGPASSWORD`). By default, the server connects via `host: localhost`, `port: 5432`, `user: postgres`, and `database: compare_devices`.
+   - Start the backend server. The database will automatically be seeded from `src/Backend/Data/db.json` upon startup if it is currently empty:
+     ```bash
+     npm run server
+     ```
 
-- host: `localhost`
-- port: `5432`
-- database: `compare_devices`
-- user: `postgres`
+3. **Frontend Setup:**
+   - In a new terminal window, install the project dependencies:
+     ```bash
+     npm install
+     ```
+   - Start the Vite development server:
+     ```bash
+     npm run dev
+     ```
+   - Open your browser and navigate to `http://localhost:5173`.
 
-You only need to override `PGHOST`, `PGPORT`, `PGDATABASE`, or `PGUSER` if your setup is different.
+## Future Roadmap
 
-On startup, the backend creates a `devices` table and, if it is empty, imports the records from `src/Backend/Data/db.json`.
+- Advanced filtering modules (filter by exact specifications like price, RAM, or CPU power)
+- Device-specific user reviews, ratings, and community discussions
+- Deep integration for user accounts allowing saved cross-session device comparisons
+- Enhanced visual data charting for specification highlighting
 
-If you want to seed manually, run `npm --prefix src/Backend run seed`.
+## Author
+
+**Aditya**  
+GitHub: [aditya123000](https://github.com/aditya123000)
+
+⭐ *If you find this project helpful or interesting, please consider giving it a star on GitHub!*
