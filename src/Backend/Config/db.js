@@ -25,19 +25,32 @@ const getSslConfig = () => {
   return { rejectUnauthorized: false };
 };
 
-const getPool = () => {
-  if (pool) {
-    return pool;
+const getConnectionConfig = () => {
+  const connectionString = process.env.DATABASE_URL?.trim();
+
+  if (connectionString) {
+    return {
+      connectionString,
+      ssl: getSslConfig(),
+    };
   }
 
-  pool = new Pool({
+  return {
     host: process.env.PGHOST ?? defaultDbConfig.host,
     port: Number.parseInt(process.env.PGPORT ?? String(defaultDbConfig.port), 10),
     database: process.env.PGDATABASE ?? defaultDbConfig.database,
     user: process.env.PGUSER ?? defaultDbConfig.user,
     password: process.env.PGPASSWORD ?? "",
     ssl: getSslConfig(),
-  });
+  };
+};
+
+const getPool = () => {
+  if (pool) {
+    return pool;
+  }
+
+  pool = new Pool(getConnectionConfig());
 
   return pool;
 };

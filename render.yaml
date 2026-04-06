@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: compare-device-api
+    runtime: node
+    rootDir: src/Backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: PG_SSL
+        value: true
+      - key: AUTO_SEED_DB
+        value: true
+      - key: CORS_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false

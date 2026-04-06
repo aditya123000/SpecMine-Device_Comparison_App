@@ -1,3 +1,5 @@
+import { getApiUrl } from "./apiBase.js";
+
 const parseJsonResponse = async (response) => {
   const data = await response.json().catch(() => ({}));
 
@@ -17,7 +19,7 @@ const createAuthRequest = async (path, body, token) => {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`/api/auth${path}`, {
+  const response = await fetch(getApiUrl(`/api/auth${path}`), {
     method: body ? "POST" : "GET",
     headers,
     body: body ? JSON.stringify(body) : undefined,
