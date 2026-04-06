@@ -12,10 +12,9 @@ dotenv.config();
 
 const app = express();
 const PORT = Number.parseInt(globalThis.process?.env?.PORT ?? "8000", 10);
-const allowedOrigins = ["http://localhost:5173","https://specmine.netlify.app"]
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",")
+  : ["http://localhost:5173", "https://specmine.netlify.app"];
 
 app.use(cors({
   origin: function (origin, callback) {
