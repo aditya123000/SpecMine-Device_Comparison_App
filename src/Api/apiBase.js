@@ -1,6 +1,7 @@
 const trimTrailingSlash = (value) => String(value ?? "").replace(/\/+$/, "");
 
 const configuredApiBaseUrl = trimTrailingSlash(import.meta.env.VITE_API_BASE_URL);
+const isConfiguredApiBaseUrl = Boolean(configuredApiBaseUrl);
 
 const getApiUrl = (path) => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -8,4 +9,4 @@ const getApiUrl = (path) => {
   return configuredApiBaseUrl ? `${configuredApiBaseUrl}${normalizedPath}` : normalizedPath;
 };
 
-export { getApiUrl };
+export { configuredApiBaseUrl, getApiUrl, isConfiguredApiBaseUrl };

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import Spinner from "../../components/Global-components/Spinner";
 import { getDevices } from "../../Api/deviceApi";
+import { configuredApiBaseUrl, isConfiguredApiBaseUrl } from "../../Api/apiBase";
 import DeviceCard from "./DeviceCard";
 import { useCompare } from "../Compare/context/useCompare";
 import {
@@ -21,6 +22,18 @@ const getSectionLinkClass = ({ isActive }) =>
   isActive
     ? "rounded-full border border-sky-400/70 bg-sky-400/15 px-3 py-1.5 text-xs font-semibold text-sky-700 dark:text-sky-200"
     : "rounded-full border border-slate-300 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-sky-400/40 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300 dark:hover:text-sky-200";
+
+const getDeviceLoadErrorMessage = () => {
+  if (import.meta.env.DEV) {
+    return "Could not load devices from the backend. Make sure the local API server is running and the Vite proxy can reach it.";
+  }
+
+  if (!isConfiguredApiBaseUrl) {
+    return "Could not load devices because the production API base URL is not configured. Set VITE_API_BASE_URL in Netlify and redeploy.";
+  }
+
+  return `Could not load devices from the API. Check that the backend is live and CORS allows this site. Current API base URL: ${configuredApiBaseUrl}`;
+};
 
 const DevicesPage = ({ sectionKey = "phones" }) => {
   const [devices, setDevices] = useState([]);
@@ -46,7 +59,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
         setLoadError("");
       } catch (error) {
         console.error("Failed to fetch Devices", error.message);
-        setLoadError("Could not load devices from the backend. Make sure the API server is running on port 8000.");
+        setLoadError(getDeviceLoadErrorMessage());
       } finally {
         setLoading(false);
       }
