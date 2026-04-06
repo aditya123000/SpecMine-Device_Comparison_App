@@ -15,7 +15,7 @@ const PORT = Number.parseInt(globalThis.process?.env?.PORT ?? "8000", 10);
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN ?? "https://specmine.netlify.app",
   })
 );
 app.use(express.json());
