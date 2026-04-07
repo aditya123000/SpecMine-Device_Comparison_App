@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { FiLogOut, FiMoon, FiSun } from "react-icons/fi";
 import { useTheme } from "../../context/useTheme";
 import { useAuth } from "../../context/useAuth";
+import logo from "../../assets/logo.png";
 
 const AUTH_TOAST_STORAGE_KEY = "auth_toast";
 
@@ -40,7 +41,7 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           <img
             className="size-11"
-            src="/src/assets/logo.png"
+            src={logo}
             alt="SpecMine logo"
           />
           <h1 className="text-2xl font-bold text-sky-600 dark:text-sky-400">
