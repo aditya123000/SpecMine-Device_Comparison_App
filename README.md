@@ -91,6 +91,7 @@ This repo is now structured for a split deployment:
   - `AUTO_SEED_DB=true`
 - Point `CORS_ORIGIN` to your Netlify site URL. You can also include localhost while testing, for example:
   - `http://localhost:5173,https://your-site.netlify.app`
+  - If you use Netlify preview/branch deploys, you can also allow them with `https://*.netlify.app`
 
 ### 3. Netlify
 

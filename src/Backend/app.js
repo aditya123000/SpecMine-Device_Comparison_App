@@ -12,16 +12,36 @@ dotenv.config();
 
 const app = express();
 const PORT = Number.parseInt(globalThis.process?.env?.PORT ?? "8000", 10);
-const allowedOrigins = process.env.CORS_ORIGIN
+const defaultAllowedOrigins = ["http://localhost:5173", "https://specmine.netlify.app"];
+const allowedOriginPatterns = (process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",")
-  : ["http://localhost:5173", "https://specmine.netlify.app"];
+  : defaultAllowedOrigins
+)
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isOriginAllowed = (origin) =>
+  allowedOriginPatterns.some((pattern) => {
+    if (!pattern.includes("*")) {
+      return pattern === origin;
+    }
+
+    const wildcardRegex = new RegExp(
+      `^${pattern.split("*").map(escapeRegex).join(".*")}$`
+    );
+
+    return wildcardRegex.test(origin);
+  });
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || isOriginAllowed(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      const corsError = new Error("Not allowed by CORS");
+      corsError.status = 403;
+      callback(corsError);
     }
   },
   credentials: true
