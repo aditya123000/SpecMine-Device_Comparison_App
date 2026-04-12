@@ -126,6 +126,43 @@ const seedDevicesFromJson = async (seedFilePath = defaultSeedFilePath) => {
   return devices.length;
 };
 
+const replaceDevicesFromJson = async (seedFilePath = defaultSeedFilePath) => {
+  const raw = await fs.readFile(seedFilePath, "utf-8");
+  const data = JSON.parse(raw);
+  const devices = Array.isArray(data.devices) ? data.devices : [];
+  const client = await getPool().connect();
+
+  try {
+    await client.query("BEGIN");
+    await client.query("TRUNCATE TABLE devices");
+
+    for (const device of devices) {
+      await client.query(
+        `
+          INSERT INTO devices (id, brand, model, category, price, payload)
+          VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+        `,
+        [
+          String(device.id),
+          device.brand ?? "Unknown",
+          device.model ?? "Unknown",
+          device.category ?? null,
+          device.price ?? null,
+          JSON.stringify(device),
+        ]
+      );
+    }
+
+    await client.query("COMMIT");
+    return devices.length;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 const initializeDatabase = async () => {
   await createDevicesTable();
   await createUsersTable();
@@ -143,4 +180,12 @@ const initializeDatabase = async () => {
   }
 };
 
-export { createDevicesTable, createUsersTable, getPool, initializeDatabase, query, seedDevicesFromJson };
+export {
+  createDevicesTable,
+  createUsersTable,
+  getPool,
+  initializeDatabase,
+  query,
+  replaceDevicesFromJson,
+  seedDevicesFromJson,
+};

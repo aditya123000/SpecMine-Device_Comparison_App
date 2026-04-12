@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "seed": "node scripts/seedDevices.js"
+    "seed": "node scripts/seedDevices.js",
+    "import:mobiles": "node scripts/importMobilesCsv.js"
   },
   "keywords": [],
   "author": "",
