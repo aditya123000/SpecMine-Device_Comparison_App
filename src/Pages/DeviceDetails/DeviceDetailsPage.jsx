@@ -36,6 +36,7 @@ const DeviceDetailsPage = () => {
 
   const basicDetails = useMemo(
     () => [
+      { label: "Launch Year", value: device?.launchedYear || "N/A" },
       { label: "Display", value: device?.display || "N/A" },
       { label: "Processor", value: device?.processor || "N/A" },
       { label: "Battery", value: device?.battery || "N/A" },

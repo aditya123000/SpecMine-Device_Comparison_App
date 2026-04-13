@@ -77,6 +77,16 @@ const stripStorageFromModelName = (modelName) =>
     .replace(/\s{2,}/g, " ")
     .trim();
 
+const inferPhoneOs = (brand) => {
+  const normalizedBrand = String(brand || "").trim().toLowerCase();
+
+  if (normalizedBrand === "apple") {
+    return "iOS";
+  }
+
+  return normalizedBrand ? "Android" : "Not specified";
+};
+
 const sanitizeValue = (value) => {
   const trimmed = String(value || "").trim();
   return trimmed || "";
@@ -96,14 +106,14 @@ const mapMobileRecord = (row, index) => {
     price,
     available: price !== null,
     display: sanitizeValue(row["Screen Size"]),
-    refreshRate: "",
+    refreshRate: "Not specified",
     processor: sanitizeValue(row["Processor"]),
     ram: sanitizeValue(row["RAM"]),
-    storage,
+    storage: storage || "Not specified",
     camera: backCamera,
     battery: sanitizeValue(row["Battery Capacity"]),
-    charging: "",
-    os: "",
+    charging: "Not specified",
+    os: inferPhoneOs(row["Company Name"]),
     image: "https://img.icons8.com/fluency/480/iphone-x.png",
     mobileWeight: sanitizeValue(row["Mobile Weight"]),
     frontCamera,
