@@ -29,7 +29,7 @@ const getDeviceLoadErrorMessage = () => {
   }
 
   if (!isConfiguredApiBaseUrl) {
-    return "Could not load devices because the production API base URL is not configured. Set VITE_API_BASE_URL in Netlify and redeploy.";
+    return "Could not load devices because the production API base URL is not configured. Set VITE_API_BASE_URL and redeploy.";
   }
 
   return `Could not load devices from the API. Check that the backend is live and CORS allows this site. Current API base URL: ${configuredApiBaseUrl}`;

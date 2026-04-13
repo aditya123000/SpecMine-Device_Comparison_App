@@ -12,7 +12,7 @@ dotenv.config();
 
 const app = express();
 const PORT = Number.parseInt(globalThis.process?.env?.PORT ?? "8000", 10);
-const defaultAllowedOrigins = ["http://localhost:5173", "https://specmine.netlify.app"];
+const defaultAllowedOrigins = ["http://localhost:5173", "https://specmine.vercel.app"];
 const allowedOriginPatterns = (process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",")
   : defaultAllowedOrigins

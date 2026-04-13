@@ -62,7 +62,7 @@ SpecMine is a modern, comprehensive web application designed to help users intel
 
 This repo is now structured for a split deployment:
 
-- **Netlify** for the Vite frontend
+- **Vercel** for the Vite frontend
 - **Render** for the Express API
 - **Supabase** for the PostgreSQL database
 
@@ -89,18 +89,18 @@ This repo is now structured for a split deployment:
   - `CORS_ORIGIN`
   - `PG_SSL=true`
   - `AUTO_SEED_DB=true`
-- Point `CORS_ORIGIN` to your Netlify site URL. You can also include localhost while testing, for example:
-  - `http://localhost:5173,https://your-site.netlify.app`
-  - If you use Netlify preview/branch deploys, you can also allow them with `https://*.netlify.app`
+- Point `CORS_ORIGIN` to your Vercel site URL. You can also include localhost while testing, for example:
+  - `http://localhost:5173,https://your-site.vercel.app`
+  - If you use Vercel preview/branch deploys, you can also allow them with `https://*.vercel.app`
 
-### 3. Netlify
+### 3. Vercel
 
-- This repo includes [netlify.toml](/c:/Users/akash/Desktop/Compare-Device-Frontend/netlify.toml) for the frontend build.
-- Create a new Netlify site from the repo.
+- This repo includes [vercel.toml](/c:/Users/akash/Desktop/Compare-Device-Frontend/vercel.toml) for the frontend build.
+- Create a new Vercel site from the repo.
 - Use:
   - build command: `npm run build`
   - publish directory: `dist`
-- Set this environment variable in Netlify:
+- Set this environment variable in Vercel:
   - `VITE_API_BASE_URL=https://your-render-service.onrender.com`
 - The frontend now reads that value through [src/Api/apiBase.js](/c:/Users/akash/Desktop/Compare-Device-Frontend/src/Api/apiBase.js), so API requests go to Render in production and still use the local Vite proxy during development.
 
