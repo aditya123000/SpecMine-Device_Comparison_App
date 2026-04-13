@@ -71,6 +71,12 @@ const extractStorage = (modelName) => {
   return match ? `${match[1]} ${match[2].toUpperCase()}` : "";
 };
 
+const stripStorageFromModelName = (modelName) =>
+  String(modelName || "")
+    .replace(/\s+\d+(?:\.\d+)?\s?(GB|TB)\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
 const sanitizeValue = (value) => {
   const trimmed = String(value || "").trim();
   return trimmed || "";
@@ -86,7 +92,7 @@ const mapMobileRecord = (row, index) => {
     id: `phone-${index + 1}`,
     category: "phones",
     brand: sanitizeValue(row["Company Name"]) || "Unknown",
-    model: sanitizeValue(row["Model Name"]) || `Mobile ${index + 1}`,
+    model: stripStorageFromModelName(sanitizeValue(row["Model Name"])) || `Mobile ${index + 1}`,
     price,
     available: price !== null,
     display: sanitizeValue(row["Screen Size"]),
@@ -98,7 +104,7 @@ const mapMobileRecord = (row, index) => {
     battery: sanitizeValue(row["Battery Capacity"]),
     charging: "",
     os: "",
-    image: "/placeholder-phone.png",
+    image: "https://img.icons8.com/fluency/480/iphone-x.png",
     mobileWeight: sanitizeValue(row["Mobile Weight"]),
     frontCamera,
     backCamera,
