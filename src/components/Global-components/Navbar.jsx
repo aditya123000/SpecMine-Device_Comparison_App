@@ -34,16 +34,11 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        
+    <nav className="fixed inset-x-0 top-0 z-[70] border-b border-slate-200/70 bg-white/75 backdrop-blur-xl supports-[backdrop-filter]:bg-white/65 dark:border-slate-700/70 dark:bg-slate-900/75 dark:supports-[backdrop-filter]:bg-slate-900/65">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Left side: Logo + Brand */}
         <div className="flex items-center gap-3">
-          <img
-            className="size-11"
-            src={logo}
-            alt="SpecMine logo"
-          />
+          <img className="size-11" src={logo} alt="SpecMine logo" />
           <h1 className="text-2xl font-bold text-sky-600 dark:text-sky-400">
             SpecMine
           </h1>
@@ -91,7 +86,6 @@ const Navbar = () => {
             </span>
           </button>
         </ul>
-
       </div>
     </nav>
   );
