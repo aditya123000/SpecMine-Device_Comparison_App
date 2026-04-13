@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import Spinner from "../../components/Global-components/Spinner";
 import { getDevices } from "../../Api/deviceApi";
-import { configuredApiBaseUrl, isConfiguredApiBaseUrl } from "../../Api/apiBase";
+import { configuredApiBaseUrl } from "../../Api/apiBase";
 import DeviceCard from "./DeviceCard";
 import { useCompare } from "../Compare/context/useCompare";
 import {
@@ -28,8 +28,8 @@ const getDeviceLoadErrorMessage = () => {
     return "Could not load devices from the backend. Make sure the local API server is running and the Vite proxy can reach it.";
   }
 
-  if (!isConfiguredApiBaseUrl) {
-    return "Could not load devices because the production API base URL is not configured. Set VITE_API_BASE_URL and redeploy.";
+  if (!configuredApiBaseUrl) {
+    return "Could not load devices from the same-origin /api endpoint. On Vercel, make sure the project includes the serverless API routes and that the deployment finished successfully.";
   }
 
   return `Could not load devices from the API. Check that the backend is live and CORS allows this site. Current API base URL: ${configuredApiBaseUrl}`;
