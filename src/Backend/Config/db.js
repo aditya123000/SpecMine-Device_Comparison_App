@@ -14,24 +14,43 @@ const defaultDbConfig = {
 };
 
 let pool;
+let poolSslOverride;
 
-const getSslConfig = () => {
-  const useSsl = String(process.env.PG_SSL ?? "").toLowerCase() === "true";
+const parseSslPreference = () => {
+  const rawValue = String(process.env.PG_SSL ?? "").trim().toLowerCase();
 
-  if (!useSsl) {
+  if (!rawValue || rawValue === "auto" || rawValue === "prefer") {
+    return null;
+  }
+
+  if (["true", "1", "yes", "require"].includes(rawValue)) {
+    return true;
+  }
+
+  if (["false", "0", "no", "disable"].includes(rawValue)) {
+    return false;
+  }
+
+  return null;
+};
+
+const getSslConfig = (sslOverride = poolSslOverride) => {
+  const sslPreference = sslOverride ?? parseSslPreference();
+
+  if (!sslPreference) {
     return false;
   }
 
   return { rejectUnauthorized: false };
 };
 
-const getConnectionConfig = () => {
+const getConnectionConfig = (sslOverride = poolSslOverride) => {
   const connectionString = process.env.DATABASE_URL?.trim();
 
   if (connectionString) {
     return {
       connectionString,
-      ssl: getSslConfig(),
+      ssl: getSslConfig(sslOverride),
     };
   }
 
@@ -41,21 +60,76 @@ const getConnectionConfig = () => {
     database: process.env.PGDATABASE ?? defaultDbConfig.database,
     user: process.env.PGUSER ?? defaultDbConfig.user,
     password: process.env.PGPASSWORD ?? "",
-    ssl: getSslConfig(),
+    ssl: getSslConfig(sslOverride),
   };
 };
 
-const getPool = () => {
-  if (pool) {
+const resetPool = async () => {
+  if (!pool) {
+    return;
+  }
+
+  const currentPool = pool;
+  pool = null;
+  await currentPool.end().catch(() => {});
+};
+
+const getPool = (sslOverride = poolSslOverride) => {
+  if (pool && sslOverride === poolSslOverride) {
     return pool;
   }
 
-  pool = new Pool(getConnectionConfig());
+  if (pool && sslOverride !== poolSslOverride) {
+    pool.end().catch(() => {});
+    pool = null;
+  }
+
+  poolSslOverride = sslOverride;
+  pool = new Pool(getConnectionConfig(sslOverride));
 
   return pool;
 };
 
-const query = (text, params = []) => getPool().query(text, params);
+const getSslFallbackOverride = (error) => {
+  const message = String(error?.message ?? "").toLowerCase();
+
+  if (message.includes("does not support ssl connections")) {
+    return false;
+  }
+
+  if (
+    message.includes("ssl off") ||
+    message.includes("ssl is required") ||
+    message.includes("must be enabled") ||
+    message.includes("requires ssl")
+  ) {
+    return true;
+  }
+
+  return null;
+};
+
+const withSslFallback = async (operation) => {
+  try {
+    return await operation(getPool());
+  } catch (error) {
+    const fallbackOverride = getSslFallbackOverride(error);
+
+    if (fallbackOverride === null || fallbackOverride === poolSslOverride) {
+      throw error;
+    }
+
+    await resetPool();
+    console.warn(
+      `Retrying PostgreSQL connection with SSL ${fallbackOverride ? "enabled" : "disabled"} after connection mismatch.`
+    );
+
+    return operation(getPool(fallbackOverride));
+  }
+};
+
+const query = (text, params = []) =>
+  withSslFallback((activePool) => activePool.query(text, params));
 
 const createDevicesTable = async () => {
   await query(`
@@ -130,7 +204,7 @@ const replaceDevicesFromJson = async (seedFilePath = defaultSeedFilePath) => {
   const raw = await fs.readFile(seedFilePath, "utf-8");
   const data = JSON.parse(raw);
   const devices = Array.isArray(data.devices) ? data.devices : [];
-  const client = await getPool().connect();
+  const client = await withSslFallback((activePool) => activePool.connect());
 
   try {
     await client.query("BEGIN");

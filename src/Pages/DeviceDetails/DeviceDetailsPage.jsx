@@ -172,12 +172,14 @@ const DeviceDetailsPage = () => {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                {heroHighlights.map(({ label, icon: Icon }) => (
+                {heroHighlights.map(({ label, icon }) => (
                   <div
                     key={label}
                     className="inline-flex items-center gap-3 rounded-full bg-sky-50 px-5 py-3 text-sm font-semibold text-slate-800 ring-1 ring-sky-100 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700"
                   >
-                    <Icon className="text-base text-sky-600 dark:text-sky-300" />
+                    {React.createElement(icon, {
+                      className: "text-base text-sky-600 dark:text-sky-300",
+                    })}
                     <span>{label}</span>
                   </div>
                 ))}
@@ -232,8 +234,6 @@ const DeviceDetailsPage = () => {
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2 2xl:grid-cols-4">
             {specGroups.map((group) => {
-              const Icon = group.icon;
-
               return (
                 <article
                   key={group.title}
@@ -241,7 +241,9 @@ const DeviceDetailsPage = () => {
                 >
                   <div className="mb-5 flex items-center gap-4">
                     <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 dark:bg-slate-700 dark:text-sky-300">
-                      <Icon className="text-xl" />
+                      {React.createElement(group.icon, {
+                        className: "text-xl",
+                      })}
                     </span>
                     <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50">
                       {group.title}

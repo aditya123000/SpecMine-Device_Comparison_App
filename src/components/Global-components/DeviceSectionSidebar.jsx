@@ -66,13 +66,13 @@ const DeviceSectionSidebar = ({ activeSectionKey = "phones", title = "SpecMine",
 
       <div className="mt-8 border-t border-slate-200 pt-5 dark:border-slate-800">
         <div className="space-y-2">
-          {secondaryActions.map(({ label, icon: Icon }) => (
+          {secondaryActions.map(({ label, icon }) => (
             <div
               key={label}
               className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
-                <Icon className="text-lg" />
+                {React.createElement(icon, { className: "text-lg" })}
               </span>
               <span>{label}</span>
             </div>
