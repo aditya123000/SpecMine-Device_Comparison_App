@@ -11,9 +11,9 @@ import {
 import DeviceImage from "@/components/DeviceImage";
 import Spinner from "../../components/Global-components/Spinner";
 import DeviceSectionSidebar from "../../components/Global-components/DeviceSectionSidebar";
-import { useCompare } from "../Compare/context/useCompare";
-import { getDeviceSectionKey } from "../Devices/deviceSections";
-import { getDeviceById } from "../services/deviceServices";
+import { useCompare } from "../compare/context/useCompare";
+import { getDeviceSectionKey } from "../devices/deviceSections";
+import { getDeviceById } from "../../services/deviceServices";
 
 const EXCLUDED_SPEC_KEYS = ["id", "brand", "model", "price", "available", "image"];
 

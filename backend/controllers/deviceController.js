@@ -1,8 +1,8 @@
-import { normalizeDevice } from "../Utils/normalizeDevice.js";
+import { normalizeDevice } from "../utils/normalizeDevice.js";
 import {
   getAllDevices,
   getDeviceById as getDeviceByIdFromDb,
-} from "../Repositories/deviceRepository.js";
+} from "../repositories/deviceRepository.js";
 
 //Get all devices
 const getDevices = async (req, res, next) => {

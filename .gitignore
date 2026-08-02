@@ -30,3 +30,6 @@ dist-ssr
 src/Backend/.env
 src/Backend/.env.*
 !src/Backend/.env.example
+
+# Project Description
+projectDescription.md

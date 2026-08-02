@@ -5,7 +5,7 @@ import { Pool } from "pg";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const defaultSeedFilePath = path.resolve(__dirname, "../Data/db.json");
+const defaultSeedFilePath = path.resolve(__dirname, "db.json");
 const defaultDbConfig = {
   host: "localhost",
   port: 5432,

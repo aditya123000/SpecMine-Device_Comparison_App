@@ -3,12 +3,12 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { pathToFileURL } from "url";
-import deviceRoutes from "./Routes/deviceRoutes.js";
-import authRoutes from "./Routes/authRoutes.js";
-import logger from "./Middleware/logger.js";
-import notFound from "./Middleware/notFound.js";
-import errorHandler from "./Middleware/errorHandler.js";
-import { initializeDatabase } from "./Config/db.js";
+import deviceRoutes from "../backend/routes/deviceRoutes.js";
+import authRoutes from "../backend/routes/authRoutes.js";
+import logger from "./middleware/logger.js";
+import notFound from "./middleware/notFound.js";
+import errorHandler from "./middleware/errorHandler.js";
+import { initializeDatabase } from "./config/db.js";
 
 dotenv.config();
 

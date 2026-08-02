@@ -1,5 +1,5 @@
-import { findUserById } from "../Repositories/userRepository.js";
-import { verifyJwt } from "../Utils/jwt.js";
+import { findUserById } from "../repositories/userRepository.js";
+import { verifyJwt } from "../utils/jwt.js";
 
 const protect = async (req, res, next) => {
   try {

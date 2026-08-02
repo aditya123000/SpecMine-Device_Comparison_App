@@ -1,4 +1,4 @@
-import { query } from "../Config/db.js";
+import { query } from "../config/db.js";
 
 const mapUserRow = (row) => {
   if (!row) {

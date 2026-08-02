@@ -1,4 +1,4 @@
-import { getApiUrl } from "../../Api/apiBase.js";
+import { getApiUrl } from "../Api/apiBase.js";
 
 const sanitizeDevices = (data) => {
   if (!Array.isArray(data)) return [];

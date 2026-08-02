@@ -1,6 +1,6 @@
-import { createUser, findUserByEmail } from "../Repositories/userRepository.js";
-import { hashPassword, verifyPassword } from "../Utils/passwords.js";
-import { signJwt } from "../Utils/jwt.js";
+import { createUser, findUserByEmail } from "../repositories/userRepository.js";
+import { hashPassword, verifyPassword } from "../utils/passwords.js";
+import { signJwt } from "../utils/jwt.js";
 
 const formatAuthResponse = (user) => ({
   token: signJwt({ sub: user.id, email: user.email }),

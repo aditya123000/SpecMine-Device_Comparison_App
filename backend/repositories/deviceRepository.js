@@ -1,5 +1,5 @@
-import { query } from "../Config/db.js";
-import { normalizeDevice } from "../Utils/normalizeDevice.js";
+import { query } from "../config/db.js";
+import { normalizeDevice } from "../utils/normalizeDevice.js";
 
 const buildDeviceFromRow = (row) => {
   const { id, brand, model, category, price, payload } = row;

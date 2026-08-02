@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaPlus } from "react-icons/fa";
-import CompareTable from "../Compare/CompareComponents/CompareTable";
-import { useCompare } from "../Compare/context/useCompare";
+import CompareTable from "./CompareComponents/CompareTable";
+import { useCompare } from "./context/useCompare";
 import { getDevices } from "../../Api/deviceApi";
 import SearchBar from "../../components/Global-components/SearchBar";
 import DeviceImage from "../../components/DeviceImage";

@@ -1,4 +1,4 @@
-import { initializeApp } from "../src/Backend/app.js";
+import { initializeApp } from "../backend/app";
 
 export default async function handler(req, res) {
   const app = await initializeApp();
