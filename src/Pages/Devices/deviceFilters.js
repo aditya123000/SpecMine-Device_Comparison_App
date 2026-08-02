@@ -9,7 +9,7 @@ const extractNumber = (value) => {
 };
 
 export const getUniqueBrands = (devices) =>
-  [...new Set(devices.map((device) => normalizeText(device.brand)).filter(Boolean))]
+  [...new Set(devices.map((device) => normalizeText(device?.brand ?? 'Unknown Brand')).filter(Boolean))]
     .sort()
     .map((value) => value.replace(/\b\w/g, (char) => char.toUpperCase()));
 
@@ -19,7 +19,7 @@ export const applyDeviceFilters = (devices, filters) => {
 
   return devices.filter((device) => {
     const brandMatches =
-      filters.brand === "all" || normalizeText(device.brand) === normalizeText(filters.brand);
+      filters.brand === "all" || normalizeText(device?.brand ?? 'Unknown Brand') === normalizeText(filters.brand);
 
     const availabilityMatches =
       filters.availability === "all" ||

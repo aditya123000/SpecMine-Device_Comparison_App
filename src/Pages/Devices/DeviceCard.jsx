@@ -4,11 +4,12 @@ import DeviceImage from "../../components/DeviceImage";
 
 const DeviceCard = ({ device, isSelected, onToggleCompare }) => {
   const navigate = useNavigate();
-  const { id, brand, model, price, available } = device;
 
-  if (!device || Object.keys(device).length === 0) {
+  if (!device || typeof device !== "object" || Object.keys(device).length === 0) {
     return null;
   }
+
+  const { id, brand, model, price, available } = device;
 
   return (
     <article
@@ -17,7 +18,7 @@ const DeviceCard = ({ device, isSelected, onToggleCompare }) => {
     >
       <DeviceImage
         src={device.image}
-        alt={`${device.brand} ${device.model}`}
+        alt={`${device?.brand ?? 'Unknown Brand'} ${device.model}`}
         variant="card"
         className="h-28"
       />

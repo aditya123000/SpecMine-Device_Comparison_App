@@ -133,7 +133,7 @@ const importMobilesCsv = async (csvPath = defaultCsvPath) => {
   const rows = parseCsv(csvContent);
   const importedPhones = rows
     .map(mapMobileRecord)
-    .filter((device) => device.brand && device.model && device.price !== null);
+    .filter((device) => (device?.brand ?? 'Unknown Brand') && device.model && device.price !== null);
 
   const existingData = JSON.parse(existingJson);
   const existingDevices = Array.isArray(existingData.devices) ? existingData.devices : [];

@@ -47,7 +47,10 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
     const fetchDevices = async () => {
       try {
         const res = await getDevices();
-        setDevices(res);
+        const validDevices = Array.isArray(res)
+          ? res.filter((device) => device && typeof device === "object")
+          : [];
+        setDevices(validDevices);
         setLoadError("");
       } catch (error) {
         console.error("Failed to fetch Devices", error.message);
@@ -70,7 +73,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
 
     const normalizedSearch = normalizeText(searchTerm);
     return sectionDevices.filter((device) => {
-      const searchableText = normalizeText(`${device.brand || ""} ${device.model || ""}`);
+      const searchableText = normalizeText(`${(device?.brand ?? 'Unknown Brand') || ""} ${device.model || ""}`);
       return searchableText.includes(normalizedSearch);
     });
   }, [sectionDevices, searchTerm]);

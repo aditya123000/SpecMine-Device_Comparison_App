@@ -148,7 +148,7 @@ const DeviceDetailsPage = () => {
             <div className="space-y-6">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm font-bold uppercase tracking-[0.32em] text-sky-600 dark:text-sky-300">
-                  {device.brand}
+                  {device?.brand ?? 'Unknown Brand'}
                 </span>
                 <span
                   className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
@@ -209,7 +209,7 @@ const DeviceDetailsPage = () => {
             <div className="rounded-[30px] bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.14),_transparent_52%),linear-gradient(145deg,_rgba(15,23,42,0.05),_rgba(15,23,42,0.02))] p-6 shadow-[0_30px_80px_-45px_rgba(15,23,42,0.5)] dark:bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.2),_transparent_52%),linear-gradient(145deg,_rgba(15,23,42,0.8),_rgba(15,23,42,0.95))]">
               <DeviceImage
                 src={device.image}
-                alt={`${device.brand} ${device.model}`}
+                alt={`${device?.brand ?? 'Unknown Brand'} ${device.model}`}
                 variant="details"
                 className="drop-shadow-[0_22px_40px_rgba(15,23,42,0.3)]"
               />

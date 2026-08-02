@@ -22,7 +22,7 @@ const CompareHeader = ({ devices, gridTemplate }) => {
           <div className="absolute right-2 top-2">
             <RemoveDeviceButton
               onRemove={() => toggleCompare(device)}
-              label={`Remove ${device.brand || ""} ${device.model || device.name || "device"} from comparison`}
+              label={`Remove ${(device?.brand ?? 'Unknown Brand') || ""} ${device.model || device.name || "device"} from comparison`}
             />
           </div>
           {device.model || device.name}

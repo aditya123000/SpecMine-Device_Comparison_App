@@ -7,5 +7,11 @@ export const getDevices = async () => {
     throw new Error("Failed to fetch devices");
   }
 
-  return response.json();
+  const devices = await response.json();
+
+  if (!Array.isArray(devices)) {
+    return [];
+  }
+
+  return devices.filter((device) => device && typeof device === "object");
 };

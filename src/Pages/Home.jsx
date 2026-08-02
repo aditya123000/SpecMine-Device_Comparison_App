@@ -109,13 +109,13 @@ const Home = () => {
 
     return devices
       .filter((device) => {
-        const combined = `${device.brand || ""} ${device.model || ""}`.toLowerCase();
+        const combined = `${(device?.brand ?? 'Unknown Brand') || ""} ${device.model || ""}`.toLowerCase();
         return combined.includes(query);
       })
       .map((device) => ({
         id: device.id,
-        label: `${device.brand} ${device.model}`,
-        value: `${device.brand} ${device.model}`,
+        label: `${device?.brand ?? 'Unknown Brand'} ${device.model}`,
+        value: `${device?.brand ?? 'Unknown Brand'} ${device.model}`,
       }));
   }, [devices, searchQuery]);
 

@@ -1,3 +1,4 @@
+import { normalizeDevice } from "../Utils/normalizeDevice.js";
 import {
   getAllDevices,
   getDeviceById as getDeviceByIdFromDb,
@@ -8,7 +9,10 @@ const getDevices = async (req, res, next) => {
   try {
     const limit = Number.parseInt(req.query.limit, 10);
     const devices = await getAllDevices(Number.isNaN(limit) ? undefined : limit);
-    return res.status(200).json(devices);
+    const normalizedDevices = devices
+      .map(normalizeDevice)
+      .filter((device) => device !== null);
+    return res.status(200).json(normalizedDevices);
   } catch (error) {
     return next(error);
   }
@@ -25,7 +29,7 @@ const getDeviceById = async (req, res, next) => {
       return next(error);
     }
 
-    return res.status(200).json(device);
+    return res.status(200).json(normalizeDevice(device));
   } catch (error) {
     return next(error);
   }

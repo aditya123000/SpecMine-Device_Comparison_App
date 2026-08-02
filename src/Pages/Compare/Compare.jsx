@@ -76,7 +76,14 @@ const Compare = () => {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) return [];
 
-    return filteredDevices.map((device) => ({
+    const validDevices = (filteredDevices || []).filter(device => 
+      device !== null && 
+      typeof device === 'object' &&
+      (device.brand ? device.brand : 'Unknown Brand') !== undefined &&
+      device.model !== undefined
+    );
+
+    return validDevices.map((device) => ({
       id: device.id,
       label: getDeviceLabel(device),
       value: getDeviceLabel(device),
