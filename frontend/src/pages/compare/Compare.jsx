@@ -30,11 +30,12 @@ const Compare = () => {
   const [query, setQuery] = useState("");
   const [activeSlot, setActiveSlot] = useState(0);
 
-  const canCompare = selectedDevices.length >= 2;
-  const compareSlots = Array.from({ length: 3 }, (_, index) => selectedDevices[index] || null);
+  const compareDevices = useMemo(() => selectedDevices.filter(Boolean), [selectedDevices]);
+  const canCompare = compareDevices.length >= 2;
+  const compareSlots = Array.from({ length: 3 }, (_, index) => compareDevices[index] || null);
   const selectedIds = useMemo(
-    () => new Set(selectedDevices.map((device) => device.id)),
-    [selectedDevices]
+    () => new Set(compareDevices.map((device) => device.id)),
+    [compareDevices]
   );
 
   useEffect(() => {

@@ -1,6 +1,17 @@
+const PLACEHOLDER = "—";
+
+const isMissingValue = (value) => {
+  if (value === undefined || value === null) return true;
+  if (typeof value !== "string") return false;
+
+  return ["—", "â€”", "", "n/a", "na", "not specified", "null", "undefined"].includes(
+    value.trim().toLowerCase()
+  );
+};
+
 export const normalizeSpecValue = (spec, value) => {
-  if (value === "—" || value === undefined || value === null || value === "") {
-    return { type: "text", value: "—" };
+  if (isMissingValue(value)) {
+    return { type: "text", value: PLACEHOLDER };
   }
 
   if (spec.toLowerCase() === "availability" || spec.toLowerCase() === "available") {
@@ -16,9 +27,13 @@ export const normalizeSpecValue = (spec, value) => {
         ? value
         : Number(String(value).replace(/[^0-9.]/g, ""));
 
+    if (!Number.isFinite(numericPrice)) {
+      return { type: "text", value: PLACEHOLDER };
+    }
+
     return {
       type: "price",
-      value: Number.isFinite(numericPrice) ? numericPrice : 0,
+      value: numericPrice,
     };
   }
 

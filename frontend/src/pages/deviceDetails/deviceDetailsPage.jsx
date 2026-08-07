@@ -14,8 +14,19 @@ import DeviceSectionSidebar from "../../components/Global-components/DeviceSecti
 import { useCompare } from "../compare/context/useCompare";
 import { getDeviceSectionKey } from "../devices/deviceSections";
 import { getDeviceById } from "../../services/deviceServices";
+import { formatDeviceValue, formatSpecValue } from "../../utils/formatDeviceValue";
 
-const EXCLUDED_SPEC_KEYS = ["id", "brand", "model", "price", "available", "image"];
+const EXCLUDED_SPEC_KEYS = [
+  "id",
+  "brand",
+  "model",
+  "price",
+  "available",
+  "image",
+  "specifications",
+  "camera",
+  "connectivity",
+];
 
 const formatLabel = (key) =>
   key
@@ -87,33 +98,41 @@ const DeviceDetailsPage = () => {
   const canSelectMore = selectedDevices.length < 3 || isSelectedForCompare;
   const activeSectionKey = useMemo(() => getDeviceSectionKey(device), [device]);
 
-  const heroHighlights = useMemo(
-    () => [
-      { label: device?.processor || "Processor N/A", icon: FiCpu },
-      { label: device?.display || "Display N/A", icon: FiSmartphone },
-      { label: device?.backCamera || device?.camera || "Camera N/A", icon: FiCamera },
-    ],
-    [device]
-  );
+  const heroHighlights = useMemo(() => {
+    const cameraLabel =
+      formatSpecValue(device, "backCamera") !== "N/A"
+        ? formatSpecValue(device, "backCamera")
+        : formatSpecValue(device, "camera");
+
+    return [
+      { label: formatSpecValue(device, "processor") || "Processor N/A", icon: FiCpu },
+      { label: formatSpecValue(device, "display") || "Display N/A", icon: FiSmartphone },
+      { label: cameraLabel || "Camera N/A", icon: FiCamera },
+    ];
+  }, [device]);
 
   const specGroups = useMemo(
     () =>
       SPEC_GROUPS.map((group) => ({
         ...group,
         items: group.fields
-          .map(([label, key]) => ({
-            label,
-            value:
-              key === "available"
-                ? device?.available
-                  ? "Available"
-                  : "Out of stock"
-                : key === "price"
-                ? device?.price
-                  ? `Rs ${device.price.toLocaleString("en-IN")}`
-                  : "N/A"
-                : device?.[key] || "N/A",
-          }))
+          .map(([label, key]) => {
+            let value;
+
+            if (key === "available") {
+              value = device?.available ? "Available" : "Out of stock";
+            } else if (key === "price") {
+              const formatted = formatDeviceValue(device?.price);
+              value =
+                formatted === "N/A"
+                  ? "N/A"
+                  : `Rs ${Number(device.price).toLocaleString("en-IN")}`;
+            } else {
+              value = formatSpecValue(device, key);
+            }
+
+            return { label, value };
+          })
           .filter((item) => item.value && item.value !== "N/A"),
       })).filter((group) => group.items.length > 0),
     [device]
@@ -278,7 +297,9 @@ const DeviceDetailsPage = () => {
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
                   {formatLabel(key)}
                 </p>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{value}</p>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  {formatDeviceValue(value)}
+                </p>
               </div>
             ))}
           </div>

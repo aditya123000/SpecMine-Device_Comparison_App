@@ -77,7 +77,9 @@ SpecMine-Compare-Devices/
 │       ├── Api/               # apiBase.js, deviceApi.js, authApi.js
 │       ├── components/        # Navbar, Footer, SearchBar, DeviceImage, etc.
 │       ├── context/           # Auth, Theme, Compare contexts
-│       └── pages/            # Home, Devices, Compare, Auth, DeviceDetails
+│       ├── pages/             # Home, Devices, Compare, Auth, DeviceDetails
+│       ├── services/          # Device detail fetch helpers
+│       └── utils/             # Shared value formatting helpers
 ├── supabase/
 │   └── migrations/
 │       └── 001_initial_schema.sql

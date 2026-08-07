@@ -2,25 +2,22 @@ import { query } from "../config/db.js";
 import { normalizeDevice } from "../utils/normalizeDevice.js";
 
 const buildDeviceFromRow = (row) => {
-  const { id, brand, model, category, price, payload } = row;
+  const { payload, ...rowFields } = row;
 
   if (payload && typeof payload === "object") {
-    return normalizeDevice(payload);
+    return normalizeDevice({
+      ...rowFields,
+      ...payload,
+    });
   }
 
-  return normalizeDevice({
-    id,
-    brand,
-    model,
-    category,
-    price,
-  });
+  return normalizeDevice(rowFields);
 };
 
 const getAllDevices = async (limit) => {
   const params = [];
   let sql = `
-    SELECT id, brand, model, category, price, payload
+    SELECT *
     FROM devices
     ORDER BY
       CASE WHEN id ~ '^[0-9]+$' THEN id::int END NULLS LAST,
@@ -38,11 +35,10 @@ const getAllDevices = async (limit) => {
 
 const getDeviceById = async (id) => {
   const { rows } = await query(
-    "SELECT id, brand, model, category, price, payload FROM devices WHERE id = $1",
+    "SELECT * FROM devices WHERE id = $1",
     [String(id)]
   );
   return rows[0] ? buildDeviceFromRow(rows[0]) : null;
 };
 
 export { getAllDevices, getDeviceById };
-

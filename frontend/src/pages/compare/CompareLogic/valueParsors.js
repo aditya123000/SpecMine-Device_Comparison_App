@@ -1,3 +1,11 @@
+const PLACEHOLDER_VALUES = new Set(["—", "â€”", "", "n/a", "na", "not specified", "null", "undefined"]);
+
+const isMissingValue = (value) => {
+  if (value === null || value === undefined) return true;
+  if (typeof value !== "string") return false;
+  return PLACEHOLDER_VALUES.has(value.trim().toLowerCase());
+};
+
 const toNumber = (value) => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value !== "string") return null;
@@ -60,7 +68,7 @@ const parseOsVersion = (value) => {
 export const extractNumber = (value) => toNumber(value);
 
 export const parseComparableValue = (spec, value) => {
-  if (value === null || value === undefined || value === "—") return null;
+  if (isMissingValue(value)) return null;
 
   switch (spec) {
     case "Price":

@@ -2,7 +2,7 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./Layouts/MainLayout";
 import AppLayout from "./Layouts/AppLayout";
-import Home from "./Pages/Home";
+import Home from "./pages/Home";
 import PhonesPage from "./Pages/Devices/sections/PhonesPage";
 import LaptopsPage from "./Pages/Devices/sections/LaptopsPage";
 import TabletsPage from "./Pages/Devices/sections/TabletsPage";

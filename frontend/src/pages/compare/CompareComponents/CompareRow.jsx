@@ -17,7 +17,7 @@ const CompareRow = ({ spec, devices, gridTemplate }) => {
 
       {devices.map((device, index) => (
         <CompareCell
-          key={device.id}
+          key={device?.id ?? `${spec}-${index}`}
           device={device}
           spec={spec}
           isBest={bestIndices.includes(index)}

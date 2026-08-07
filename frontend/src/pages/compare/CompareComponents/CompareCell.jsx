@@ -12,8 +12,8 @@ const CompareCell = ({ device, spec, isBest }) => {
     spec === "Availability"
       ? "text-slate-700 dark:text-slate-300"
       : isBest
-      ? "bg-emerald-500/10 text-emerald-600 font-semibold dark:text-emerald-300"
-      : "text-slate-600 dark:text-slate-400";
+        ? "bg-emerald-500/10 text-emerald-600 font-semibold dark:text-emerald-300"
+        : "text-slate-600 dark:text-slate-400";
 
   if (formatted.type === "availability") {
     return (
@@ -30,10 +30,14 @@ const CompareCell = ({ device, spec, isBest }) => {
   }
 
   if (formatted.type === "price") {
-    return <div className={`${baseClass} ${emphasisClass}`}>Rs {formatted.value.toLocaleString("en-IN")}</div>;
+    return (
+      <div className={`${baseClass} ${emphasisClass}`}>
+        Rs {formatted.value.toLocaleString("en-IN")}
+      </div>
+    );
   }
 
-  return <div className={`${baseClass} ${emphasisClass}`}>{formatted.value}</div>;
+  return <div className={`${baseClass} ${emphasisClass}`}>{String(formatted.value ?? "—")}</div>;
 };
 
 export default CompareCell;
