@@ -4,15 +4,15 @@ import MainLayout from "./Layouts/MainLayout";
 import AppLayout from "./Layouts/AppLayout";
 import Home from "./pages/Home";
 import PhonesPage from "./pages/devices/sections/PhonesPage";
-import LaptopsPage from "./Pages/devices/sections/LaptopsPage";
-import TabletsPage from "./Pages/devices/sections/TabletsPage";
-import EarbudsPage from "./Pages/devices/sections/EarbudsPage";
-import HeadphonesPage from "./Pages/devices/sections/HeadphonesPage";
-import TVsPage from "./Pages/devices/sections/TVsPage";
-import Compare from "./Pages/compare/Compare";
-import NotFound from "./Pages/NotFound";
-import DeviceDetailsPage from "./Pages/deviceDetails/deviceDetailsPage";
-import AuthPage from "./Pages/auth/AuthPage";
+import LaptopsPage from "./pages/devices/sections/LaptopsPage";
+import TabletsPage from "./pages/devices/sections/TabletsPage";
+import EarbudsPage from "./pages/devices/sections/EarbudsPage";
+import HeadphonesPage from "./pages/devices/sections/HeadphonesPage";
+import TVsPage from "./pages/devices/sections/TVsPage";
+import Compare from "./pages/compare/Compare";
+import NotFound from "./pages/NotFound";
+import DeviceDetailsPage from "./pages/deviceDetails/deviceDetailsPage";
+import AuthPage from "./pages/auth/AuthPage";
 
 const router = createBrowserRouter([
   {
