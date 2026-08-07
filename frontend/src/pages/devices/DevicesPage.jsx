@@ -5,7 +5,7 @@ import { getDevices } from "../../Api/deviceApi";
 import { configuredApiBaseUrl } from "../../Api/apiBase";
 import DeviceCard from "./DeviceCard";
 import DeviceSectionSidebar from "../../components/Global-components/DeviceSectionSidebar";
-import { useCompare } from "../Compare/context/useCompare";
+import { useCompare } from "../compare/context/useCompare";
 import { filterDevicesBySection, getSectionMeta } from "./deviceSections";
 import { applyDeviceFilters, getUniqueBrands } from "./deviceFilters";
 
