@@ -11,7 +11,7 @@ import {
   FiTablet,
   FiTv,
 } from "react-icons/fi";
-import { DEVICE_SECTIONS } from "../../Pages/Devices/deviceSections";
+import { DEVICE_SECTIONS } from "../../pages/devices/deviceSections";
 
 const iconBySection = {
   phones: FiSmartphone,
