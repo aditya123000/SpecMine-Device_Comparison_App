@@ -3,16 +3,16 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./Layouts/MainLayout";
 import AppLayout from "./Layouts/AppLayout";
 import Home from "./pages/Home";
-import PhonesPage from "./Pages/Devices/sections/PhonesPage";
-import LaptopsPage from "./Pages/Devices/sections/LaptopsPage";
-import TabletsPage from "./Pages/Devices/sections/TabletsPage";
-import EarbudsPage from "./Pages/Devices/sections/EarbudsPage";
-import HeadphonesPage from "./Pages/Devices/sections/HeadphonesPage";
-import TVsPage from "./Pages/Devices/sections/TVsPage";
-import Compare from "./Pages/Compare/Compare";
+import PhonesPage from "./pages/devices/sections/PhonesPage";
+import LaptopsPage from "./Pages/devices/sections/LaptopsPage";
+import TabletsPage from "./Pages/devices/sections/TabletsPage";
+import EarbudsPage from "./Pages/devices/sections/EarbudsPage";
+import HeadphonesPage from "./Pages/devices/sections/HeadphonesPage";
+import TVsPage from "./Pages/devices/sections/TVsPage";
+import Compare from "./Pages/compare/Compare";
 import NotFound from "./Pages/NotFound";
-import DeviceDetailsPage from "./Pages/DeviceDetails/DeviceDetailsPage";
-import AuthPage from "./Pages/Auth/AuthPage";
+import DeviceDetailsPage from "./Pages/deviceDetails/deviceDetailsPage";
+import AuthPage from "./Pages/auth/AuthPage";
 
 const router = createBrowserRouter([
   {
