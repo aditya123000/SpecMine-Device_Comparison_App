@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { CompareProvider } from "../Pages/Compare/context/CompareContext";
+import { CompareProvider } from "../pages/compare/context/CompareContext";
 import { AuthProvider } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
 
