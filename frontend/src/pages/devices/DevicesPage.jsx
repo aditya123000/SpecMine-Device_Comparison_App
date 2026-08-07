@@ -248,7 +248,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
         </section>
 
         {selectedDevices.length > 0 && (
-          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-full border border-slate-300 bg-white/95 px-4 py-3 shadow-xl backdrop-blur dark:border-slate-600 dark:bg-slate-900/95">
+          <div className="fixed bottom-24 right-5 z-50 flex items-center gap-3 rounded-full border border-slate-300 bg-white/95 px-4 py-3 shadow-xl backdrop-blur dark:border-slate-600 dark:bg-slate-900/95 sm:bottom-28">
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
               Selected <span className="text-slate-900 dark:text-slate-100">{selectedDevices.length}</span>/3
             </p>
