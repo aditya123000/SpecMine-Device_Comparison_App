@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { FiArrowRight } from "react-icons/fi";
 import Spinner from "../../components/Global-components/Spinner";
 import { getDevices } from "../../Api/deviceApi";
 import { configuredApiBaseUrl } from "../../Api/apiBase";
@@ -285,17 +286,19 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
           </div>
         </section>
 
-        {selectedDevices.length > 0 && (
-          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-full border border-slate-300 bg-white/95 px-4 py-3 shadow-xl backdrop-blur dark:border-slate-600 dark:bg-slate-900/95">
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
-              Selected <span className="text-slate-900 dark:text-slate-100">{selectedDevices.length}</span>/3
+        {/* Floating Compare Button: only shows when 2 or more devices are selected, positioned safely above the footer with z-[80] */}
+        {selectedDevices.length >= 2 && (
+          <div className="fixed bottom-24 right-6 z-[80] flex items-center gap-3 rounded-full border border-slate-300 bg-white/95 px-5 py-3 shadow-lg backdrop-blur-xl transition-all duration-300 dark:border-slate-700 dark:bg-slate-900/95 sm:bottom-28 sm:right-8">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Ready to compare <span className="font-bold text-sky-600 dark:text-sky-400">{selectedDevices.length}</span>/3
             </p>
             <button
               onClick={() => navigate("/compare")}
-              disabled={selectedDevices.length < 2}
-              className="rounded-full bg-sky-400 px-4 py-1.5 text-xs font-semibold text-slate-900 transition enabled:hover:bg-sky-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+              className="inline-flex items-center gap-1.5 rounded-full bg-sky-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-sky-400 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
             >
-              Compare
+              Compare Now
+              <FiArrowRight className="text-xs" />
             </button>
           </div>
         )}

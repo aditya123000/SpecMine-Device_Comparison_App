@@ -1,20 +1,31 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaArrowRight, FaArrowUp, FaPlus } from "react-icons/fa";
+import { FaArrowRight, FaArrowUp, FaExclamationTriangle, FaPlus } from "react-icons/fa";
 import CompareTable from "./CompareComponents/CompareTable";
 import { useCompare } from "./context/useCompare";
 import { getDevices } from "../../Api/deviceApi";
 import SearchBar from "../../components/Global-components/SearchBar";
 import DeviceImage from "../../components/DeviceImage";
+import { getDeviceSectionKey, getSectionMeta } from "../devices/deviceSections";
 
 const buildPopularComparisons = (devices) => {
   const pairs = [];
+  const groupedBySection = {};
 
-  for (let index = 0; index < devices.length - 1 && pairs.length < 6; index += 2) {
-    pairs.push([devices[index], devices[index + 1]]);
+  for (const device of devices) {
+    if (!device.image) continue;
+    const sec = getDeviceSectionKey(device);
+    if (!groupedBySection[sec]) groupedBySection[sec] = [];
+    groupedBySection[sec].push(device);
   }
 
-  return pairs;
+  for (const secDevices of Object.values(groupedBySection)) {
+    for (let i = 0; i < secDevices.length - 1 && pairs.length < 6; i += 2) {
+      pairs.push([secDevices[i], secDevices[i + 1]]);
+    }
+  }
+
+  return pairs.slice(0, 6);
 };
 
 const getDeviceLabel = (device) => `${device?.brand || ""} ${device?.model || ""}`.trim();
@@ -22,6 +33,7 @@ const getDeviceLabel = (device) => `${device?.brand || ""} ${device?.model || ""
 const Compare = () => {
   const {
     selectedDevices,
+    compareError,
     setComparedDevices,
     replaceComparedDeviceAt,
     removeComparedDeviceAt,
@@ -38,6 +50,16 @@ const Compare = () => {
     () => new Set(compareDevices.map((device) => device.id)),
     [compareDevices]
   );
+
+  // Active category constraint based on current selection
+  const activeSectionKey = useMemo(() => {
+    if (compareDevices.length > 0) {
+      return getDeviceSectionKey(compareDevices[0]);
+    }
+    return null;
+  }, [compareDevices]);
+
+  const activeSectionLabel = activeSectionKey ? getSectionMeta(activeSectionKey).label : null;
 
   useEffect(() => {
     const loadDevices = async () => {
@@ -57,9 +79,15 @@ const Compare = () => {
   const filteredDevices = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     const activeDevice = compareSlots[activeSlot];
+
     const available = allDevices.filter((device) => {
       if (activeDevice?.id === device.id) {
         return true;
+      }
+
+      // If a category is locked in, only show devices of the same category
+      if (activeSectionKey && getDeviceSectionKey(device) !== activeSectionKey) {
+        return false;
       }
 
       return !selectedIds.has(device.id);
@@ -75,7 +103,7 @@ const Compare = () => {
         return searchText.includes(normalizedQuery);
       })
       .slice(0, 8);
-  }, [activeSlot, allDevices, compareSlots, query, selectedIds]);
+  }, [activeSectionKey, activeSlot, allDevices, compareSlots, query, selectedIds]);
 
   const suggestions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -96,10 +124,15 @@ const Compare = () => {
     }));
   }, [filteredDevices, query]);
 
-  const suggestedDevices = useMemo(
-    () => allDevices.filter((device) => !selectedIds.has(device.id)).slice(0, 3),
-    [allDevices, selectedIds]
-  );
+  const suggestedDevices = useMemo(() => {
+    return allDevices
+      .filter((device) => {
+        if (selectedIds.has(device.id)) return false;
+        if (activeSectionKey && getDeviceSectionKey(device) !== activeSectionKey) return false;
+        return true;
+      })
+      .slice(0, 3);
+  }, [activeSectionKey, allDevices, selectedIds]);
 
   const popularComparisons = useMemo(
     () => buildPopularComparisons(allDevices.filter((device) => device.image)),
@@ -130,8 +163,10 @@ const Compare = () => {
             </div>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               {canCompare
-                ? `Comparing ${compareDevices.length} devices side-by-side.`
-                : "Select at least two devices below to unlock the detailed specification comparison."}
+                ? `Comparing ${compareDevices.length} ${activeSectionLabel || "devices"} side-by-side.`
+                : compareDevices.length === 1
+                  ? `1 ${activeSectionLabel?.replace(/s$/i, "") || "device"} selected. Add at least one more to compare.`
+                  : "Select at least two devices below of the same category to unlock side-by-side comparisons."}
             </p>
           </div>
 
@@ -171,10 +206,21 @@ const Compare = () => {
         className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_60px_-45px_rgba(15,23,42,0.45)] dark:border-slate-700 dark:bg-slate-800/50"
       >
         <div className="border-b border-slate-200/80 px-6 py-6 dark:border-slate-700">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">Select Mobiles to Compare</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Pick up to three devices and compare their specs in the table above.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">Select Mobiles to Compare</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {activeSectionLabel
+                  ? `Currently comparing ${activeSectionLabel}. All devices must belong to the ${activeSectionLabel} category.`
+                  : "Pick up to three devices from the same category to compare."}
+              </p>
+            </div>
+            {activeSectionLabel && (
+              <span className="inline-flex items-center self-start rounded-full bg-sky-500/10 px-3.5 py-1.5 text-xs font-semibold text-sky-600 ring-1 ring-sky-400/20 dark:bg-sky-400/10 dark:text-sky-300">
+                Category: {activeSectionLabel}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-10 px-6 py-7 md:px-7">
@@ -201,7 +247,7 @@ const Compare = () => {
                     >
                       <div className="min-w-0">
                         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
-                          {`Phone ${index + 1}`}
+                          {`Slot ${index + 1}`}
                         </p>
                         <p className="mt-1 truncate text-base font-semibold text-slate-900 dark:text-slate-100">
                           {device ? getDeviceLabel(device) : "Select a product"}
@@ -257,7 +303,7 @@ const Compare = () => {
                     }
                   }}
                   suggestions={suggestions}
-                  placeholder={`Search a device for slot ${activeSlot + 1}`}
+                  placeholder={`Search a ${activeSectionLabel?.replace(/s$/i, "") || "device"} for slot ${activeSlot + 1}`}
                 />
 
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -284,7 +330,7 @@ const Compare = () => {
                     ))
                   ) : (
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      No matching devices found for this slot.
+                      No matching {activeSectionLabel || "devices"} found for this slot.
                     </p>
                   )}
                 </div>
@@ -297,7 +343,7 @@ const Compare = () => {
                   onClick={() => {
                     document.getElementById("compare-results")?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="inline-flex items-center justify-center gap-2 w-full max-w-md rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-700 transition enabled:bg-slate-800 enabled:text-white enabled:hover:bg-slate-900 dark:bg-slate-700 dark:text-slate-200 dark:enabled:bg-slate-100 dark:enabled:text-slate-950"
+                  className="inline-flex items-center justify-center gap-2 w-full max-w-md rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-700 transition enabled:bg-slate-800 enabled:text-white enabled:hover:bg-slate-900 dark:bg-slate-700 dark:text-slate-200 dark:enabled:bg-slate-100 dark:enabled:text-slate-950 disabled:cursor-not-allowed"
                 >
                   <FaArrowUp className="text-base" /> View Comparison at Top
                 </button>
@@ -315,7 +361,7 @@ const Compare = () => {
             <div className="mb-5 flex items-center gap-4">
               <span className="h-10 w-1 rounded-full bg-orange-500" />
               <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-                Compare Suggested Mobiles
+                Compare Suggested {activeSectionLabel || "Mobiles"}
               </h3>
             </div>
 
