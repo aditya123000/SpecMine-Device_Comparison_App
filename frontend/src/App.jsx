@@ -13,6 +13,7 @@ import Compare from "./pages/compare/Compare";
 import NotFound from "./pages/NotFound";
 import DeviceDetailsPage from "./pages/deviceDetails/deviceDetailsPage";
 import AuthPage from "./pages/auth/AuthPage";
+import ProfilePage from "./pages/auth/ProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
         {
           path: "/register",
           element: <AuthPage mode="register" />,
+        },
+        {
+          path: "/profile",
+          element: <ProfilePage />,
         },
         {
           path:"/devices/:id",

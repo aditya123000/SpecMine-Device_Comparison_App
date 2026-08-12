@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FiLogOut, FiMoon, FiSun } from "react-icons/fi";
+import { FiLogOut, FiMoon, FiSun, FiUser } from "react-icons/fi";
 import { useTheme } from "../../context/useTheme";
 import { useAuth } from "../../context/useAuth";
 import logo from "../../assets/logo.png";
@@ -54,6 +54,14 @@ const Navbar = () => {
               <span className="hidden text-sm text-slate-600 dark:text-slate-300 md:inline">
                 {user?.name}
               </span>
+              <NavLink
+                to="/profile"
+                end
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 transition hover:border-sky-400 hover:text-sky-600 dark:border-slate-600 dark:text-slate-200 dark:hover:text-sky-300"
+              >
+                Profile
+                <FiUser className="text-sm" />
+              </NavLink>
               <button
                 type="button"
                 onClick={handleLogout}

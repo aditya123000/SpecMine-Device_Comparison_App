@@ -19,8 +19,10 @@ const createAuthRequest = async (path, body, token) => {
     headers.Authorization = `Bearer ${token}`;
   }
 
+  const method = body ? (path === "/register" || path === "/login" ? "POST" : "PUT") : "GET";
+
   const response = await fetch(getApiUrl(`/api/auth${path}`), {
-    method: body ? "POST" : "GET",
+    method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -31,5 +33,7 @@ const createAuthRequest = async (path, body, token) => {
 const registerUser = (payload) => createAuthRequest("/register", payload);
 const loginUser = (payload) => createAuthRequest("/login", payload);
 const getCurrentUser = (token) => createAuthRequest("/me", null, token);
+const updateProfile = (payload, token) => createAuthRequest("/profile", payload, token);
+const changePassword = (payload, token) => createAuthRequest("/password", payload, token);
 
-export { getCurrentUser, loginUser, registerUser };
+export { getCurrentUser, loginUser, registerUser, updateProfile, changePassword };

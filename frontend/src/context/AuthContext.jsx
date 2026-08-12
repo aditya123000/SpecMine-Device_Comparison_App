@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContextObject";
-import { getCurrentUser, loginUser as loginRequest, registerUser as registerRequest } from "../Api/authApi";
+import { getCurrentUser, loginUser as loginRequest, registerUser as registerRequest, updateProfile as updateProfileRequest, changePassword as changePasswordRequest } from "../Api/authApi";
 
 const STORAGE_KEY = "auth_session";
 
@@ -113,6 +113,17 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateProfile = async (payload) => {
+    const data = await updateProfileRequest(payload, token);
+    setUser(data.user);
+    return data;
+  };
+
+  const changePassword = async (payload) => {
+    await changePasswordRequest(payload, token);
+    return {};
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -123,6 +134,8 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        updateProfile,
+        changePassword,
       }}
     >
       {children}
