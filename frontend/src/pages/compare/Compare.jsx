@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaArrowRight, FaPlus } from "react-icons/fa";
+import { FaArrowRight, FaArrowUp, FaPlus } from "react-icons/fa";
 import CompareTable from "./CompareComponents/CompareTable";
 import { useCompare } from "./context/useCompare";
 import { getDevices } from "../../Api/deviceApi";
@@ -27,6 +27,7 @@ const Compare = () => {
     removeComparedDeviceAt,
   } = useCompare();
   const [allDevices, setAllDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [activeSlot, setActiveSlot] = useState(0);
 
@@ -41,10 +42,13 @@ const Compare = () => {
   useEffect(() => {
     const loadDevices = async () => {
       try {
+        setLoading(true);
         const data = await getDevices();
         setAllDevices(data);
       } catch (error) {
         console.error("Failed to fetch devices", error.message);
+      } finally {
+        setLoading(false);
       }
     };
     loadDevices();
@@ -77,11 +81,12 @@ const Compare = () => {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) return [];
 
-    const validDevices = (filteredDevices || []).filter(device => 
-      device !== null && 
-      typeof device === 'object' &&
-      (device.brand ? device.brand : 'Unknown Brand') !== undefined &&
-      device.model !== undefined
+    const validDevices = (filteredDevices || []).filter(
+      (device) =>
+        device !== null &&
+        typeof device === "object" &&
+        (device.brand ? device.brand : "Unknown Brand") !== undefined &&
+        device.model !== undefined
     );
 
     return validDevices.map((device) => ({
@@ -112,26 +117,68 @@ const Compare = () => {
   };
 
   return (
-    <div className="flex flex-col gap-7">
-      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_60px_-45px_rgba(15,23,42,0.45)] dark:border-slate-700 dark:bg-slate-800/50">
+    <div className="flex flex-col gap-8">
+      {/* 1. Comparison Results Section at the TOP */}
+      <section id="compare-results" className="space-y-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="h-8 w-1 rounded-full bg-orange-500" />
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
+                Comparison Results
+              </h1>
+            </div>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              {canCompare
+                ? `Comparing ${compareDevices.length} devices side-by-side.`
+                : "Select at least two devices below to unlock the detailed specification comparison."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <a
+              href="#device-selector"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("device-selector")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-sky-600 transition hover:text-sky-500 dark:text-sky-400"
+            >
+              Add / Change devices <FaArrowRight className="text-xs" />
+            </a>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800/50">
+            <div className="h-14 rounded-xl bg-slate-200 dark:bg-slate-700/60" />
+            <div className="mt-4 space-y-3">
+              <div className="h-10 rounded-lg bg-slate-100 dark:bg-slate-800" />
+              <div className="h-10 rounded-lg bg-slate-100 dark:bg-slate-800" />
+              <div className="h-10 rounded-lg bg-slate-100 dark:bg-slate-800" />
+              <div className="h-10 rounded-lg bg-slate-100 dark:bg-slate-800" />
+              <div className="h-10 rounded-lg bg-slate-100 dark:bg-slate-800" />
+            </div>
+          </div>
+        ) : (
+          <CompareTable />
+        )}
+      </section>
+
+      {/* 2. Device Selection & Search Section */}
+      <section
+        id="device-selector"
+        className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_60px_-45px_rgba(15,23,42,0.45)] dark:border-slate-700 dark:bg-slate-800/50"
+      >
         <div className="border-b border-slate-200/80 px-6 py-6 dark:border-slate-700">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">Compare Mobiles</h1>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">Select Mobiles to Compare</h2>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Pick up to three devices and compare their specs in the table above.
+          </p>
         </div>
 
         <div className="space-y-10 px-6 py-7 md:px-7">
           <section>
-            <div className="mb-5 flex items-center gap-4">
-              <span className="h-10 w-1 rounded-full bg-orange-500" />
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-                  Select Mobiles to Compare
-                </h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Pick up to three devices and compare their specs side by side.
-                </p>
-              </div>
-            </div>
-
             <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
               <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
                 {compareSlots.map((device, index) => (
@@ -250,9 +297,9 @@ const Compare = () => {
                   onClick={() => {
                     document.getElementById("compare-results")?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="w-full max-w-md rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-700 transition enabled:bg-slate-800 enabled:text-white enabled:hover:bg-slate-900 dark:bg-slate-700 dark:text-slate-200 dark:enabled:bg-slate-100 dark:enabled:text-slate-950"
+                  className="inline-flex items-center justify-center gap-2 w-full max-w-md rounded-2xl bg-slate-300 px-6 py-4 text-xl font-bold text-slate-700 transition enabled:bg-slate-800 enabled:text-white enabled:hover:bg-slate-900 dark:bg-slate-700 dark:text-slate-200 dark:enabled:bg-slate-100 dark:enabled:text-slate-950"
                 >
-                  Compare Now!
+                  <FaArrowUp className="text-base" /> View Comparison at Top
                 </button>
                 <Link
                   to="/devices"
@@ -267,9 +314,9 @@ const Compare = () => {
           <section>
             <div className="mb-5 flex items-center gap-4">
               <span className="h-10 w-1 rounded-full bg-orange-500" />
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
                 Compare Suggested Mobiles
-              </h2>
+              </h3>
             </div>
 
             <div className="grid overflow-hidden rounded-[22px] border border-slate-200 bg-white md:grid-cols-3 dark:border-slate-700 dark:bg-slate-900/20">
@@ -306,6 +353,7 @@ const Compare = () => {
         </div>
       </section>
 
+      {/* 3. Popular Comparisons Section */}
       <section className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.45)] dark:border-slate-700 dark:bg-slate-800/50">
         <div className="mb-5 flex items-center gap-4">
           <span className="h-10 w-1 rounded-full bg-orange-500" />
@@ -317,7 +365,10 @@ const Compare = () => {
             <button
               key={`${leftDevice.id}-${rightDevice.id}-${index}`}
               type="button"
-              onClick={() => setComparedDevices([leftDevice, rightDevice])}
+              onClick={() => {
+                setComparedDevices([leftDevice, rightDevice]);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
               className="flex flex-col gap-5 rounded-[22px] border border-slate-200 bg-white px-5 py-5 text-left transition hover:border-sky-400/40 hover:shadow-md sm:flex-row sm:items-center sm:justify-between dark:border-slate-700 dark:bg-slate-900/20 dark:hover:border-sky-400/30"
             >
               <div className="flex items-center gap-4">
@@ -354,18 +405,6 @@ const Compare = () => {
             </button>
           ))}
         </div>
-      </section>
-
-      <section id="compare-results" className="space-y-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">Comparison Results</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            {canCompare
-              ? "Your selected devices are ready for a full specification comparison."
-              : "Select at least two devices above to unlock the detailed comparison table."}
-          </p>
-        </div>
-        <CompareTable />
       </section>
     </div>
   );

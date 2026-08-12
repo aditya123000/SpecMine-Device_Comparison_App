@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Spinner from "../../components/Global-components/Spinner";
 import { getDevices } from "../../Api/deviceApi";
@@ -8,6 +8,8 @@ import DeviceSectionSidebar from "../../components/Global-components/DeviceSecti
 import { useCompare } from "../compare/context/useCompare";
 import { filterDevicesBySection, getSectionMeta } from "./deviceSections";
 import { applyDeviceFilters, getUniqueBrands } from "./deviceFilters";
+
+const BATCH_SIZE = 24;
 
 const normalizeText = (text) =>
   String(text || "")
@@ -31,6 +33,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [displayLimit, setDisplayLimit] = useState(BATCH_SIZE);
   const [filters, setFilters] = useState({
     availability: "all",
     brand: "all",
@@ -42,6 +45,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
   const { selectedDevices, toggleCompare } = useCompare();
   const searchTerm = searchParams.get("search")?.trim() || "";
   const activeSection = getSectionMeta(sectionKey);
+  const loadMoreSentinelRef = useRef(null);
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -84,6 +88,40 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
     () => applyDeviceFilters(searchedDevices, filters),
     [searchedDevices, filters]
   );
+
+  // Reset pagination limit when category, search, or filters change
+  useEffect(() => {
+    setDisplayLimit(BATCH_SIZE);
+  }, [sectionKey, searchTerm, filters]);
+
+  const displayedDevices = useMemo(() => {
+    return filteredDevices.slice(0, displayLimit);
+  }, [filteredDevices, displayLimit]);
+
+  const hasMore = displayedDevices.length < filteredDevices.length;
+
+  // Infinite scroll observer to increment batch size smoothly as user scrolls near bottom
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const sentinel = loadMoreSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setDisplayLimit((prev) => prev + BATCH_SIZE);
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      if (sentinel) observer.unobserve(sentinel);
+    };
+  }, [hasMore, displayedDevices.length]);
 
   const activeFilterCount = useMemo(
     () =>
@@ -248,7 +286,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
         </section>
 
         {selectedDevices.length > 0 && (
-          <div className="fixed bottom-24 right-5 z-50 flex items-center gap-3 rounded-full border border-slate-300 bg-white/95 px-4 py-3 shadow-xl backdrop-blur dark:border-slate-600 dark:bg-slate-900/95 sm:bottom-28">
+          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-full border border-slate-300 bg-white/95 px-4 py-3 shadow-xl backdrop-blur dark:border-slate-600 dark:bg-slate-900/95">
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
               Selected <span className="text-slate-900 dark:text-slate-100">{selectedDevices.length}</span>/3
             </p>
@@ -273,19 +311,34 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {filteredDevices.map((device) => {
-                const isSelected = selectedDevices.some((d) => d.id === device.id);
-                return (
-                  <DeviceCard
-                    key={device.id}
-                    device={device}
-                    isSelected={isSelected}
-                    onToggleCompare={toggleCompare}
-                  />
-                );
-              })}
-            </div>
+            <>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                {displayedDevices.map((device) => {
+                  const isSelected = selectedDevices.some((d) => d.id === device.id);
+                  return (
+                    <DeviceCard
+                      key={device.id}
+                      device={device}
+                      isSelected={isSelected}
+                      onToggleCompare={toggleCompare}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Infinite scroll sentinel & status */}
+              {hasMore && (
+                <div ref={loadMoreSentinelRef} className="mt-8 flex flex-col items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setDisplayLimit((prev) => prev + BATCH_SIZE)}
+                    className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-sky-400 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-300"
+                  >
+                    Load More Devices ({filteredDevices.length - displayedDevices.length} remaining)
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>
