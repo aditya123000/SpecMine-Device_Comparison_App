@@ -2,7 +2,7 @@ services:
   - type: web
     name: compare-device-api
     runtime: node
-    rootDir: src/Backend
+    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
@@ -12,7 +12,7 @@ services:
       - key: PG_SSL
         value: true
       - key: AUTO_SEED_DB
-        value: true
+        value: false
       - key: CORS_ORIGIN
         sync: false
       - key: JWT_SECRET

@@ -4,7 +4,22 @@ create table if not exists public.devices (
   model text not null,
   category text,
   price numeric,
-  payload jsonb not null
+  payload jsonb not null,
+  available boolean,
+  display varchar,
+  "refreshRate" varchar,
+  processor varchar,
+  ram text,
+  storage text,
+  camera text,
+  battery text,
+  charging text,
+  os text,
+  image text,
+  "mobileWeight" text,
+  "frontCamera" text,
+  "backCamera" text,
+  "launchedYear" text
 );
 
 create index if not exists idx_devices_brand on public.devices (brand);
@@ -16,8 +31,12 @@ create table if not exists public.users (
   name text not null,
   email text not null unique,
   password_hash text not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
+
+alter table public.users
+  add column if not exists updated_at timestamptz not null default now();
 
 create index if not exists idx_users_email on public.users (email);
 

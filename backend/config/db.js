@@ -139,7 +139,22 @@ const createDevicesTable = async () => {
       model TEXT NOT NULL,
       category TEXT,
       price NUMERIC,
-      payload JSONB NOT NULL
+      payload JSONB NOT NULL,
+      available BOOLEAN,
+      display VARCHAR,
+      "refreshRate" VARCHAR,
+      processor VARCHAR,
+      ram TEXT,
+      storage TEXT,
+      camera TEXT,
+      battery TEXT,
+      charging TEXT,
+      os TEXT,
+      image TEXT,
+      "mobileWeight" TEXT,
+      "frontCamera" TEXT,
+      "backCamera" TEXT,
+      "launchedYear" TEXT
     );
   `);
 
@@ -261,10 +276,14 @@ const initializeDatabase = async () => {
   await createUsersTable();
   await createProductTables();
 
-  const shouldAutoSeed = String(process.env.AUTO_SEED_DB ?? "true").toLowerCase() !== "false";
+  const shouldAutoSeed = String(process.env.AUTO_SEED_DB ?? "false").toLowerCase() === "true";
 
   if (!shouldAutoSeed) {
     return;
+  }
+
+  if (String(process.env.NODE_ENV).toLowerCase() === "production") {
+    throw new Error("AUTO_SEED_DB is not allowed in production. Run a reviewed import operation instead.");
   }
 
   const { rows } = await query("SELECT COUNT(*)::int AS count FROM devices");

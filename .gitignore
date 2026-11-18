@@ -42,3 +42,8 @@ src/Backend/.env.*
 
 # Project Description
 projectDescription.md
+
+# Local planning/audit documents
+PROJECT_AUDIT.md
+IMPLEMENTATION_PLAN.md
+docs/ARCHITECTURE.md
