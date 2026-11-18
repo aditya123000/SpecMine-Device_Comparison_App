@@ -102,7 +102,7 @@ The frontend uses the same `/api` paths in development and production. Vite prox
    npm run dev
    ```
    This uses `concurrently` to start:
-   - The **backend** on port `8000` (via `nodemon`)
+   - The **backend** on port `8000` (via Node.js watch mode)
    - The **frontend** Vite dev server on port `5173`
 
    The Vite dev server proxies `/api` requests to `http://localhost:8000`, so no `VITE_API_BASE_URL` is needed in development.
@@ -154,6 +154,7 @@ See [API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) for request parameters, va
 | `PGUSER` | PostgreSQL user (default `postgres`) |
 | `PGPASSWORD` | PostgreSQL password |
 | `PG_SSL` | SSL preference: `true`/`false` (default `false`; set `true` for Supabase) |
+| `PG_SSL_CA` | Optional PEM CA certificate for hosted PostgreSQL providers using a private certificate authority; TLS certificates are verified when `PG_SSL=true` |
 | `AUTO_SEED_DB` | Optional local seed from `db.json` when the table is empty (default `false`; production startup seeding is prohibited) |
 | `SEED_REPLACE_CONFIRM` | Must equal `replace-device-catalog` to run the destructive catalog replacement script; leave unset otherwise |
 
