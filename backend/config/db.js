@@ -41,7 +41,10 @@ const getSslConfig = (sslOverride = poolSslOverride) => {
     return false;
   }
 
-  return { rejectUnauthorized: false };
+  return {
+    rejectUnauthorized: true,
+    ...(process.env.PG_SSL_CA ? { ca: process.env.PG_SSL_CA } : {}),
+  };
 };
 
 const getConnectionConfig = (sslOverride = poolSslOverride) => {
@@ -94,6 +97,10 @@ const getSslFallbackOverride = (error) => {
   const message = String(error?.message ?? "").toLowerCase();
 
   if (message.includes("does not support ssl connections")) {
+    if (parseSslPreference() === true) {
+      return null;
+    }
+
     return false;
   }
 
@@ -312,7 +319,10 @@ export {
   createDevicesTable,
   createUsersTable,
   createProductTables,
+  getConnectionConfig,
   getPool,
+  getSslConfig,
+  getSslFallbackOverride,
   initializeDatabase,
   query,
   replaceDevicesFromJson,
