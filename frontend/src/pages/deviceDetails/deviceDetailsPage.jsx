@@ -92,18 +92,36 @@ const DeviceDetailsPage = () => {
 
   const [device, setDevice] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    let isCurrentRequest = true;
+
     const loadDevice = async () => {
       setLoading(true);
-      const data = await getDeviceById(id);
-      setDevice(data);
-      if (data) recordRecentlyViewed(data.id);
-      setLoading(false);
+      setLoadError(false);
+
+      try {
+        const data = await getDeviceById(id);
+        if (!isCurrentRequest) return;
+        setDevice(data);
+        if (data) recordRecentlyViewed(data.id);
+      } catch {
+        if (!isCurrentRequest) return;
+        setDevice(null);
+        setLoadError(true);
+      } finally {
+        if (isCurrentRequest) setLoading(false);
+      }
     };
 
     loadDevice();
-  }, [id]);
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [id, retryCount]);
 
   const isSelectedForCompare = selectedDevices.some((item) => item.id === device?.id);
   const canSelectMore = selectedDevices.length < 3 || isSelectedForCompare;
@@ -160,6 +178,22 @@ const DeviceDetailsPage = () => {
 
   if (loading) {
     return <Spinner loading={loading} />;
+  }
+
+  if (loadError) {
+    return (
+      <section role="alert" className="mx-auto max-w-xl space-y-4 rounded-2xl border border-rose-200 bg-white p-8 text-center dark:border-rose-900 dark:bg-slate-900">
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Could not load this device</h1>
+        <p className="text-slate-600 dark:text-slate-300">Check your connection and try again.</p>
+        <button
+          type="button"
+          onClick={() => setRetryCount((count) => count + 1)}
+          className="rounded-xl bg-sky-600 px-5 py-3 font-semibold text-white hover:bg-sky-700"
+        >
+          Try again
+        </button>
+      </section>
+    );
   }
 
   if (!device) {

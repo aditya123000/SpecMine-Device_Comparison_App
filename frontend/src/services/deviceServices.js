@@ -14,7 +14,8 @@ export const getAllDevices = async () => {
 
 export const getDeviceById = async (id) => {
   const res = await fetch(getApiUrl(`/api/devices/${id}`));
-  if (!res.ok) return null;
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Device request failed with status ${res.status}`);
   const payload = await res.json();
   const device = payload?.data ?? payload;
   return device && typeof device === "object" ? device : null;
