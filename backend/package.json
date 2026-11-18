@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js",
+    "dev": "node --watch app.js",
     "server": "node app.js",
     "test": "node --test",
     "seed": "node scripts/seedDevices.js",
@@ -22,8 +22,5 @@
     "ejs": "^5.0.1",
     "express": "^5.2.1",
     "pg": "^8.20.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.14"
   }
 }
