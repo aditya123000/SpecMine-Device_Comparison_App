@@ -122,6 +122,8 @@ export const AuthProvider = ({ children }) => {
 
   const changePassword = async (payload) => {
     await changePasswordRequest(payload, token);
+    setToken("");
+    setUser(null);
     return {};
   };
 

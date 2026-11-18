@@ -10,7 +10,7 @@ SpecMine is a modern, full-stack web application that lets users intelligently s
 - **Multi-Category Browsing:** Seamlessly navigate through six categories — Smartphones, Laptops, Tablets, Earbuds, Headphones, and Televisions — each with dedicated pages and sidebar navigation.
 - **Side-by-Side Comparisons:** Compare up to three devices simultaneously with a detailed spec table that highlights the "best value" for each specification (e.g., highest RAM, lowest price) using a custom heuristic scoring engine.
 - **Detailed Specifications:** Access structured data for every device, covering processor/chipset, RAM/storage, display, battery, camera, connectivity, and more.
-- **User Authentication:** Register and log in for a personalized experience using a custom JWT (HS256) implementation with scrypt password hashing.
+- **User Authentication:** Register and log in with database-backed opaque sessions and scrypt password hashing.
 - **Dark / Light Theme:** A class-based dark mode toggle powered by Tailwind CSS, with the preference persisted in `localStorage`.
 - **Responsive Design:** A Tailwind-powered UI that ensures a flawless experience on both desktop and mobile devices.
 
@@ -26,7 +26,7 @@ SpecMine is a modern, full-stack web application that lets users intelligently s
 | Backend Runtime | Node.js (ES Modules) |
 | Backend Framework | Express 5 |
 | Database | PostgreSQL (via `pg` driver; Supabase in production) |
-| Auth | Custom JWT (HS256) + scrypt password hashing (Node `crypto`) |
+| Auth | Opaque database-backed sessions + scrypt password hashing (Node `crypto`) |
 | Frontend Deployment | Vercel (or Netlify) |
 | Backend Deployment | Render (or Vercel serverless) |
 | Database Hosting | Supabase |
@@ -126,11 +126,11 @@ SpecMine-Compare-Devices/
    ```bash
    cp backend/.env.example backend/.env
    ```
-   Edit `backend/.env` with your PostgreSQL credentials and a strong `JWT_SECRET`. By default, the server connects via `host: localhost`, `port: 5432`, `user: postgres`, and `database: compare_devices`. Set `PGPASSWORD` to your local Postgres password.
+   Configure `backend/.env` with your PostgreSQL credentials. The active auth flow uses database-backed sessions; `JWT_SECRET` remains only for an unused legacy helper. By default, the server connects via `host: localhost`, `port: 5432`, `user: postgres`, and `database: compare_devices`. Set `PGPASSWORD` to your local Postgres password.
 
 6. **Set up the database:**
-   - Either run the SQL in [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql) in your PostgreSQL, **or**
-   - Let the backend create the tables automatically on first boot.
+   - Apply the SQL files in [`supabase/migrations`](supabase/migrations) in numeric order.
+   - The backend can create base tables for local development, but use versioned migrations to keep schema changes consistent.
 
 7. **Start the development servers:**
    ```bash
@@ -159,11 +159,17 @@ SpecMine-Compare-Devices/
 |---|---|---|---|
 | GET | `/` | No | HTML landing page |
 | GET | `/api/health` | No | Health check → `{ status: "ok" }` |
-| GET | `/api/devices` | No | Returns array of all devices (optional `?limit=N`) |
-| GET | `/api/devices/:id` | No | Returns a single device by ID |
-| POST | `/api/auth/register` | No | Register new user → `{ token, user }` |
-| POST | `/api/auth/login` | No | Login → `{ token, user }` |
-| GET | `/api/auth/me` | Yes (Bearer) | Get current user → `{ user }` |
+| GET | `/api/devices` | No | Paginated catalog with data/meta; supports page, limit, q, brand, category, availability, maxPrice, minRam, and sort (`relevance`, `price_asc`, `price_desc`, `ram_desc`, `year_desc`) |
+| GET | `/api/devices/brands?category=phones` | No | Brand options for a device category |
+| GET | `/api/devices/:id` | No | One device with a data envelope |
+| POST | `/api/auth/register` | No | Register with a data envelope containing token, expiry, and user |
+| POST | `/api/auth/login` | No | Login with a data envelope containing token, expiry, and user |
+| GET | `/api/auth/me` | Yes (Bearer) | Current user with a data envelope |
+| POST | `/api/auth/logout` | Yes (Bearer) | Revoke current session; returns 204 |
+| PUT | `/api/auth/profile` | Yes (Bearer) | Update account name/email |
+| PUT | `/api/auth/password` | Yes (Bearer) | Change password and revoke sessions |
+| GET/POST/DELETE | `/api/library/favorites[/:deviceId]` | Yes (Bearer) | List, add, remove favorites |
+| GET/POST/DELETE | `/api/library/comparisons[/:comparisonId]` | Yes (Bearer) | List, save, remove comparisons |
 
 ## Environment Variables
 
@@ -172,8 +178,8 @@ SpecMine-Compare-Devices/
 | Variable | Purpose |
 |---|---|
 | `PORT` | Backend server port (default `8000`) |
-| `CORS_ORIGIN` | Comma-separated allowed origins (supports wildcards, e.g., `https://*.vercel.app`) |
-| `JWT_SECRET` | Secret for JWT signing/verification |
+| `CORS_ORIGIN` | Comma-separated allowed origins; exact production origins are preferred |
+| `JWT_SECRET` | Legacy custom JWT helper only; not used by active authentication routes |
 | `DATABASE_URL` | PostgreSQL connection string (preferred for production) |
 | `PGHOST` | PostgreSQL host (if not using `DATABASE_URL`) |
 | `PGPORT` | PostgreSQL port (default `5432`) |
@@ -181,7 +187,8 @@ SpecMine-Compare-Devices/
 | `PGUSER` | PostgreSQL user (default `postgres`) |
 | `PGPASSWORD` | PostgreSQL password |
 | `PG_SSL` | SSL preference: `true`/`false` (default `false`; set `true` for Supabase) |
-| `AUTO_SEED_DB` | Auto-seed from `db.json` if table empty (default `true`) |
+| `AUTO_SEED_DB` | Optional local seed from `db.json` when the table is empty (default `false`; production startup seeding is prohibited) |
+| `SEED_REPLACE_CONFIRM` | Must equal `replace-device-catalog` to run the destructive catalog replacement script; leave unset otherwise |
 
 ### Frontend (`frontend/.env`)
 
@@ -202,10 +209,10 @@ Deploy the entire project as a single Vercel site. The frontend builds from `fro
 - **Environment variables (Vercel):**
   - `VITE_API_BASE_URL` — leave empty (same-origin)
   - `DATABASE_URL` — Supabase connection string
-  - `JWT_SECRET` — strong random secret
+  - `JWT_SECRET` — legacy helper only; the active auth flow does not use it
   - `CORS_ORIGIN` — your Vercel URL(s)
   - `PG_SSL=true`
-  - `AUTO_SEED_DB=true`
+  - `AUTO_SEED_DB=false`
 
 The [`vercel.json`](vercel.json) file handles SPA routing (filesystem-first, then fallback to `index.html` for non-`/api/` paths).
 
@@ -216,8 +223,7 @@ The [`vercel.json`](vercel.json) file handles SPA routing (filesystem-first, the
 - Create a new Supabase project.
 - In **Project Settings → Database**, copy the Postgres connection string.
 - In Supabase, either:
-  - run the SQL in [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql), or
-  - let the backend create the tables automatically on first boot.
+  - apply all SQL files under [`supabase/migrations`](supabase/migrations) in numeric order.
 - Use the database password/connection string in Render as `DATABASE_URL`.
 - Keep `PG_SSL=true` in production.
 
@@ -233,10 +239,10 @@ The [`vercel.json`](vercel.json) file handles SPA routing (filesystem-first, the
   - `JWT_SECRET`
   - `CORS_ORIGIN`
   - `PG_SSL=true`
-  - `AUTO_SEED_DB=true`
+  - `AUTO_SEED_DB=false`
 - Point `CORS_ORIGIN` to your Vercel site URL. You can also include localhost while testing, for example:
   - `http://localhost:5173,https://your-site.vercel.app`
-  - If you use Vercel preview/branch deploys, you can also allow them with `https://*.vercel.app`
+  - Add exact preview origins when needed. A wildcard such as `https://*.vercel.app` allows every Vercel preview domain.
 
 #### 3. Vercel (Frontend)
 
@@ -268,7 +274,7 @@ The repo also includes [`netlify.toml`](netlify.toml) for Netlify deployment wit
 |---|---|
 | `npm start` | Start backend server (`node app.js`) |
 | `npm run dev` | Start backend with auto-reload (`nodemon app.js`) |
-| `npm run seed` | Replace all devices in the database from `Data/db.json` |
+| `npm run seed` | Destructively replace all devices from `Data/db.json`; requires `SEED_REPLACE_CONFIRM=replace-device-catalog` |
 | `npm run import:mobiles` | Import phone data from a CSV file into `Data/db.json` |
 
 ### Frontend (`frontend/package.json`)
@@ -305,13 +311,13 @@ Defined in [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/00
 | `password_hash` | TEXT | NOT NULL |
 | `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
 
-> **Note:** The `devices` table stores data both in individual columns and as a full JSONB `payload`. The repository's `buildDeviceFromRow` function falls back to the individual columns when `payload` is NULL, ensuring devices are always returned even if the JSONB column wasn't populated.
+> **Note:** The `devices` table retains common and legacy flat specification columns alongside a JSONB `payload`. Migration 002 fills missing payloads from existing columns without deleting catalog rows.
 
 ## Key Design Decisions
 
-- **Dual data storage:** Devices are stored both as individual columns and as a JSONB `payload`, with fallback to columns when `payload` is NULL.
+- **Device storage:** Common fields and legacy flat specification columns are retained alongside the JSONB `payload`. Migration 002 backfills payloads from existing flat fields without deleting catalog rows.
 - **Defense-in-depth null handling:** Both backend and frontend filter out null/non-object devices, preventing crashes from bad data.
-- **Custom JWT implementation:** JWT (HS256) is implemented from scratch using Node's `crypto` module — no external `jsonwebtoken` dependency.
+- **Database-backed sessions:** The active auth flow stores only hashes of opaque bearer tokens. A custom JWT utility remains in the repository but is not used by active auth routes.
 - **scrypt password hashing:** Uses Node's built-in `crypto.scrypt` instead of bcrypt, avoiding native dependencies.
 - **SSL fallback:** The database connection automatically retries with SSL enabled/disabled if the initial connection fails due to SSL mismatch.
 - **Heuristic processor scoring:** The compare logic uses a custom scoring algorithm for processor names (Apple, Snapdragon, Dimensity, Exynos, Tensor) to enable "best processor" highlighting.

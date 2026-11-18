@@ -44,6 +44,7 @@ const AuthPage = ({ mode = "login" }) => {
 
   const copy = formCopy[mode];
   const redirectTo = location.state?.from?.pathname ?? "/";
+  const notice = location.state?.notice;
   const isRegisterPage = mode === "register";
 
   if (!isLoading && isAuthenticated) {
@@ -122,6 +123,7 @@ const AuthPage = ({ mode = "login" }) => {
                 {copy.alternateLabel}
               </Link>
             </p>
+            {notice ? <p role="status" className="mt-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">{notice}</p> : null}
           </div>
 
           {mode === "register" && (
@@ -131,6 +133,7 @@ const AuthPage = ({ mode = "login" }) => {
                 <FiUser className="text-slate-400" />
                 <input
                   required
+                  maxLength={80}
                   type="text"
                   name="name"
                   value={formData.name}
@@ -148,6 +151,7 @@ const AuthPage = ({ mode = "login" }) => {
               <FiMail className="text-slate-400" />
               <input
                 required
+                maxLength={254}
                 type="email"
                 name="email"
                 value={formData.email}
@@ -164,12 +168,13 @@ const AuthPage = ({ mode = "login" }) => {
               <FiLock className="text-slate-400" />
               <input
                 required
-                minLength={6}
+                minLength={mode === "register" ? 8 : undefined}
+                maxLength={128}
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Minimum 6 characters"
+                placeholder={mode === "register" ? "At least 8 characters" : "Your password"}
                 className="auth-input w-full bg-transparent outline-none"
               />
             </div>

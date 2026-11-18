@@ -24,6 +24,21 @@ const getDevicePage = async (params = {}) => {
   };
 };
 
+const getDeviceBrands = async (category = "") => {
+  const searchParams = new URLSearchParams();
+  if (category) searchParams.set("category", category);
+  const suffix = searchParams.size ? `?${searchParams}` : "";
+  const response = await fetch(getApiUrl(`/api/devices/brands${suffix}`));
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch device brands");
+  }
+
+  const payload = await response.json();
+  const brands = Array.isArray(payload) ? payload : payload.data;
+  return Array.isArray(brands) ? brands.filter((brand) => typeof brand === "string") : [];
+};
+
 // Keeps existing UI consumers simple while the API remains safely paginated.
 // New screens can use getDevicePage for server-driven pagination and filters.
 export const getDevices = async (params = {}) => {
@@ -41,4 +56,4 @@ export const getDevices = async (params = {}) => {
   return firstPage.data.concat(...remainingPages.map((page) => page.data));
 };
 
-export { getDevicePage };
+export { getDeviceBrands, getDevicePage };

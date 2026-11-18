@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { FiUser, FiMail, FiLock, FiCheck, FiAlertCircle } from "react-icons/fi";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, updateProfile, changePassword } = useAuth();
 
   const [activeTab, setActiveTab] = useState("profile");
@@ -19,7 +20,6 @@ const ProfilePage = () => {
   const [profileError, setProfileError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [profileSuccess, setProfileSuccess] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -54,7 +54,6 @@ const ProfilePage = () => {
     const { name, value } = event.target;
     setPasswordForm((current) => ({ ...current, [name]: value }));
     setPasswordError("");
-    setPasswordSuccess("");
   };
 
   const handleProfileSubmit = async (event) => {
@@ -76,15 +75,14 @@ const ProfilePage = () => {
   const handlePasswordSubmit = async (event) => {
     event.preventDefault();
     setPasswordError("");
-    setPasswordSuccess("");
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setPasswordError("New passwords do not match");
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters long");
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters long");
       return;
     }
 
@@ -95,8 +93,10 @@ const ProfilePage = () => {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
       });
-      setPasswordSuccess("Password changed successfully");
-      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      navigate("/login", {
+        replace: true,
+        state: { notice: "Password changed. Sign in again with your new password." },
+      });
     } catch (error) {
       setPasswordError(error.message || "Failed to change password");
     } finally {
@@ -153,6 +153,7 @@ const ProfilePage = () => {
                     <FiUser className="text-slate-400 text-lg" />
                     <input
                       required
+                      maxLength={80}
                       type="text"
                       name="name"
                       value={profileForm.name}
@@ -171,6 +172,7 @@ const ProfilePage = () => {
                     <FiMail className="text-slate-400 text-lg" />
                     <input
                       required
+                      maxLength={254}
                       type="email"
                       name="email"
                       value={profileForm.email}
@@ -220,6 +222,7 @@ const ProfilePage = () => {
                       name="currentPassword"
                       value={passwordForm.currentPassword}
                       onChange={handlePasswordChange}
+                      maxLength={128}
                       placeholder="Enter current password"
                       className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
                     />
@@ -238,8 +241,9 @@ const ProfilePage = () => {
                       name="newPassword"
                       value={passwordForm.newPassword}
                       onChange={handlePasswordChange}
-                      placeholder="Minimum 6 characters"
-                      minLength={6}
+                      placeholder="At least 8 characters"
+                      minLength={8}
+                      maxLength={128}
                       className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
                     />
                   </div>
@@ -258,6 +262,7 @@ const ProfilePage = () => {
                       value={passwordForm.confirmPassword}
                       onChange={handlePasswordChange}
                       placeholder="Confirm new password"
+                      maxLength={128}
                       className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
                     />
                   </div>
@@ -268,13 +273,6 @@ const ProfilePage = () => {
                 <div className="flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
                   <FiAlertCircle className="shrink-0 text-base" />
                   {passwordError}
-                </div>
-              )}
-
-              {passwordSuccess && (
-                <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
-                  <FiCheck className="shrink-0 text-base" />
-                  {passwordSuccess}
                 </div>
               )}
 

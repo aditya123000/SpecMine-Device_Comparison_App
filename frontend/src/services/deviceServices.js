@@ -8,12 +8,14 @@ const sanitizeDevices = (data) => {
 export const getAllDevices = async () => {
   const res = await fetch(getApiUrl("/api/devices"));
   if (!res.ok) return [];
-  return sanitizeDevices(await res.json());
+  const payload = await res.json();
+  return sanitizeDevices(Array.isArray(payload) ? payload : payload?.data);
 };
 
 export const getDeviceById = async (id) => {
   const res = await fetch(getApiUrl(`/api/devices/${id}`));
   if (!res.ok) return null;
-  const device = await res.json();
+  const payload = await res.json();
+  const device = payload?.data ?? payload;
   return device && typeof device === "object" ? device : null;
 };

@@ -1,6 +1,13 @@
-import { createUser, findUserByEmail, updateUser } from "../repositories/userRepository.js";
+import { createUser, findUserByEmail, updatePasswordAndRevokeSessions, updateUser } from "../repositories/userRepository.js";
 import { hashPassword, verifyPassword } from "../utils/passwords.js";
-import { createSession, revokeSession, revokeUserSessions } from "../repositories/sessionRepository.js";
+import { createSession, revokeSession } from "../repositories/sessionRepository.js";
+import {
+  validateLoginPayload,
+  validatePasswordChangePayload,
+  validateProfilePayload,
+  validateRegisterPayload,
+} from "../validators/requestValidators.js";
+import { sendData } from "../utils/apiResponse.js";
 
 const formatAuthResponse = async (user) => {
   const session = await createSession(user.id);
@@ -21,19 +28,7 @@ const formatUserResponse = (user) => ({
 
 const registerUser = async (req, res, next) => {
   try {
-    const name = String(req.body?.name ?? "").trim();
-    const email = String(req.body?.email ?? "").trim().toLowerCase();
-    const password = String(req.body?.password ?? "");
-
-    if (!name || !email || !password) {
-      res.status(400);
-      throw new Error("Name, email, and password are required");
-    }
-
-    if (password.length < 6) {
-      res.status(400);
-      throw new Error("Password must be at least 6 characters long");
-    }
+    const { name, email, password } = validateRegisterPayload(req.body);
 
     const existingUser = await findUserByEmail(email);
 
@@ -45,7 +40,7 @@ const registerUser = async (req, res, next) => {
     const passwordHash = await hashPassword(password);
     const user = await createUser({ name, email, passwordHash });
 
-    res.status(201).json(await formatAuthResponse(user));
+    sendData(res, 201, await formatAuthResponse(user));
   } catch (error) {
     next(error);
   }
@@ -53,13 +48,7 @@ const registerUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
   try {
-    const email = String(req.body?.email ?? "").trim().toLowerCase();
-    const password = String(req.body?.password ?? "");
-
-    if (!email || !password) {
-      res.status(400);
-      throw new Error("Email and password are required");
-    }
+    const { email, password } = validateLoginPayload(req.body);
 
     const user = await findUserByEmail(email);
 
@@ -75,40 +64,24 @@ const loginUser = async (req, res, next) => {
       throw new Error("Invalid email or password");
     }
 
-    res.status(200).json(await formatAuthResponse(user));
+    sendData(res, 200, await formatAuthResponse(user));
   } catch (error) {
     next(error);
   }
 };
 
 const getCurrentUser = async (req, res) => {
-  res.status(200).json({ user: req.user });
+  sendData(res, 200, { user: req.user });
 };
 
 const updateProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const name = req.body?.name ? String(req.body.name).trim() : undefined;
-    const email = req.body?.email ? String(req.body.email).trim().toLowerCase() : undefined;
-
-    if (!name && !email) {
-      res.status(400);
-      throw new Error("At least one field (name or email) is required");
-    }
-
-    if (name && name.length < 1) {
-      res.status(400);
-      throw new Error("Name cannot be empty");
-    }
-
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      res.status(400);
-      throw new Error("Invalid email format");
-    }
+    const { name, email } = validateProfilePayload(req.body);
 
     const user = await updateUser(userId, { name, email });
 
-    res.status(200).json({ user: formatUserResponse(user) });
+    sendData(res, 200, { user: formatUserResponse(user) });
   } catch (error) {
     next(error);
   }
@@ -117,18 +90,7 @@ const updateProfile = async (req, res, next) => {
 const changePassword = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const currentPassword = String(req.body?.currentPassword ?? "");
-    const newPassword = String(req.body?.newPassword ?? "");
-
-    if (!currentPassword || !newPassword) {
-      res.status(400);
-      throw new Error("Current password and new password are required");
-    }
-
-    if (newPassword.length < 6) {
-      res.status(400);
-      throw new Error("New password must be at least 6 characters long");
-    }
+    const { currentPassword, newPassword } = validatePasswordChangePayload(req.body);
 
     // Get full user with password hash
     const user = await findUserByEmail(req.user.email);
@@ -145,10 +107,14 @@ const changePassword = async (req, res, next) => {
     }
 
     const newPasswordHash = await hashPassword(newPassword);
-    const updatedUser = await updateUser(userId, { passwordHash: newPasswordHash });
-    await revokeUserSessions(userId);
+    const updatedUser = await updatePasswordAndRevokeSessions(userId, newPasswordHash);
+    if (!updatedUser) {
+      const error = new Error("User not found");
+      error.status = 404;
+      throw error;
+    }
 
-    res.status(200).json({ user: formatUserResponse(updatedUser) });
+    sendData(res, 200, { user: formatUserResponse(updatedUser) });
   } catch (error) {
     next(error);
   }

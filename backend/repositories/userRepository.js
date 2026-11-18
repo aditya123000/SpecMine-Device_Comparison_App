@@ -1,4 +1,4 @@
-import { query } from "../config/db.js";
+import { query, withTransaction } from "../config/db.js";
 
 const mapUserRow = (row) => {
   if (!row) {
@@ -107,4 +107,23 @@ const updateUser = async (id, { name, email, passwordHash }) => {
   return mapUserRow(rows[0]);
 };
 
-export { createUser, findUserByEmail, findUserById, updateUser };
+const updatePasswordAndRevokeSessions = async (id, passwordHash) =>
+  withTransaction(async (client) => {
+    const { rows } = await client.query(
+      `
+        UPDATE users
+        SET password_hash = $1, updated_at = NOW()
+        WHERE id = $2
+        RETURNING id, name, email, password_hash, created_at;
+      `,
+      [passwordHash, id]
+    );
+    if (!rows[0]) return null;
+    await client.query(
+      "UPDATE user_sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+      [id]
+    );
+    return mapUserRow(rows[0]);
+  });
+
+export { createUser, findUserByEmail, findUserById, updatePasswordAndRevokeSessions, updateUser };

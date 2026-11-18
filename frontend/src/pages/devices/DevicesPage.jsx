@@ -1,22 +1,15 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiArrowRight } from "react-icons/fi";
 import Spinner from "../../components/Global-components/Spinner";
-import { getDevices } from "../../Api/deviceApi";
+import { getDeviceBrands, getDevicePage } from "../../Api/deviceApi";
 import { configuredApiBaseUrl } from "../../Api/apiBase";
 import DeviceCard from "./DeviceCard";
 import DeviceSectionSidebar from "../../components/Global-components/DeviceSectionSidebar";
 import { useCompare } from "../compare/context/useCompare";
-import { filterDevicesBySection, getSectionMeta } from "./deviceSections";
-import { applyDeviceFilters, getUniqueBrands } from "./deviceFilters";
+import { getSectionMeta } from "./deviceSections";
 
 const BATCH_SIZE = 24;
-
-const normalizeText = (text) =>
-  String(text || "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
 
 const getDeviceLoadErrorMessage = () => {
   if (import.meta.env.DEV) {
@@ -32,87 +25,106 @@ const getDeviceLoadErrorMessage = () => {
 
 const DevicesPage = ({ sectionKey = "phones" }) => {
   const [devices, setDevices] = useState([]);
+  const [availableBrands, setAvailableBrands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState("");
-  const [displayLimit, setDisplayLimit] = useState(BATCH_SIZE);
-  const [filters, setFilters] = useState({
-    availability: "all",
-    brand: "all",
-    maxPrice: "",
-    minRam: "",
-  });
+  const [meta, setMeta] = useState({ page: 1, limit: BATCH_SIZE, total: 0, totalPages: 0 });
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { selectedDevices, toggleCompare } = useCompare();
   const searchTerm = searchParams.get("search")?.trim() || "";
+  const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1);
+  const filters = {
+    availability: searchParams.get("availability") || "all",
+    brand: searchParams.get("brand") || "all",
+    maxPrice: searchParams.get("maxPrice") || "",
+    minRam: searchParams.get("minRam") || "",
+    sort: searchParams.get("sort") || "relevance",
+  };
   const activeSection = getSectionMeta(sectionKey);
   const loadMoreSentinelRef = useRef(null);
 
   useEffect(() => {
-    const fetchDevices = async () => {
+    let cancelled = false;
+    const fetchBrands = async () => {
       try {
-        const res = await getDevices();
-        const validDevices = Array.isArray(res)
-          ? res.filter((device) => device && typeof device === "object")
-          : [];
-        setDevices(validDevices);
-        setLoadError("");
-      } catch (error) {
-        console.error("Failed to fetch Devices", error.message);
-        setLoadError(getDeviceLoadErrorMessage());
-      } finally {
-        setLoading(false);
+        setAvailableBrands(await getDeviceBrands(activeSection.key));
+      } catch {
+        if (!cancelled) setLoadError(getDeviceLoadErrorMessage());
       }
     };
+    setAvailableBrands([]);
+    fetchBrands();
+    return () => { cancelled = true; };
+  }, [activeSection.key]);
 
-    fetchDevices();
-  }, []);
-
-  const sectionDevices = useMemo(
-    () => filterDevicesBySection(devices, sectionKey),
-    [devices, sectionKey]
-  );
-
-  const searchedDevices = useMemo(() => {
-    if (!searchTerm) return sectionDevices;
-
-    const normalizedSearch = normalizeText(searchTerm);
-    return sectionDevices.filter((device) => {
-      const searchableText = normalizeText(`${(device?.brand ?? 'Unknown Brand') || ""} ${device.model || ""}`);
-      return searchableText.includes(normalizedSearch);
-    });
-  }, [sectionDevices, searchTerm]);
-
-  const availableBrands = useMemo(() => getUniqueBrands(sectionDevices), [sectionDevices]);
-
-  const filteredDevices = useMemo(
-    () => applyDeviceFilters(searchedDevices, filters),
-    [searchedDevices, filters]
-  );
-
-  // Reset pagination limit when category, search, or filters change
   useEffect(() => {
-    setDisplayLimit(BATCH_SIZE);
-  }, [sectionKey, searchTerm, filters]);
+    let cancelled = false;
+    const fetchPage = async () => {
+      if (page === 1) setLoading(true);
+      else setLoadingMore(true);
+      try {
+        const result = await getDevicePage({
+          page,
+          limit: BATCH_SIZE,
+          q: searchTerm,
+          category: activeSection.key,
+          brand: filters.brand === "all" ? "" : filters.brand,
+          availability: filters.availability,
+          maxPrice: filters.maxPrice,
+          minRam: filters.minRam,
+          sort: filters.sort,
+        });
+        if (cancelled) return;
+        setDevices((current) => page === 1 ? result.data : [...current, ...result.data]);
+        setMeta(result.meta);
+        setLoadError("");
+      } catch {
+        if (!cancelled) setLoadError(getDeviceLoadErrorMessage());
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
+      }
+    };
+    fetchPage();
+    return () => { cancelled = true; };
+  }, [activeSection.key, page, searchTerm, filters.availability, filters.brand, filters.maxPrice, filters.minRam, filters.sort]);
 
-  const displayedDevices = useMemo(() => {
-    return filteredDevices.slice(0, displayLimit);
-  }, [filteredDevices, displayLimit]);
+  const hasMore = page < meta.totalPages;
 
-  const hasMore = displayedDevices.length < filteredDevices.length;
+  const updateQuery = (updates) => {
+    const next = new URLSearchParams(searchParams);
+    const defaults = { availability: "all", brand: "all", sort: "relevance" };
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === "" || value === undefined || value === defaults[key]) next.delete(key);
+      else next.set(key, String(value));
+    }
+    next.delete("page");
+    setDevices([]);
+    setMeta({ page: 1, limit: BATCH_SIZE, total: 0, totalPages: 0 });
+    setLoading(true);
+    setSearchParams(next, { replace: true });
+  };
 
-  // Infinite scroll observer to increment batch size smoothly as user scrolls near bottom
+  const loadNextPage = useCallback(() => {
+    if (!hasMore || loadingMore) return;
+    const next = new URLSearchParams(searchParams);
+    next.set("page", String(page + 1));
+    setSearchParams(next, { replace: true });
+  }, [hasMore, loadingMore, page, searchParams, setSearchParams]);
+
   useEffect(() => {
-    if (!hasMore) return;
+    if (!hasMore || loadingMore) return;
 
     const sentinel = loadMoreSentinelRef.current;
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setDisplayLimit((prev) => prev + BATCH_SIZE);
-        }
+        if (entry.isIntersecting) loadNextPage();
       },
       { rootMargin: "400px 0px" }
     );
@@ -122,18 +134,12 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
     return () => {
       if (sentinel) observer.unobserve(sentinel);
     };
-  }, [hasMore, displayedDevices.length]);
+  }, [hasMore, loadingMore, devices.length, page, loadNextPage]);
 
-  const activeFilterCount = useMemo(
-    () =>
-      ["availability", "brand", "maxPrice", "minRam"].filter((key) => {
-        if (key === "availability" || key === "brand") {
-          return filters[key] !== "all";
-        }
-        return String(filters[key]).trim() !== "";
-      }).length,
-    [filters]
-  );
+  const activeFilterCount = ["availability", "brand", "maxPrice", "minRam", "sort"].filter((key) => {
+    const defaults = { availability: "all", brand: "all", sort: "relevance" };
+    return Object.hasOwn(defaults, key) ? filters[key] !== defaults[key] : String(filters[key]).trim() !== "";
+  }).length;
 
   if (loading) {
     return <Spinner loading={loading} />;
@@ -148,7 +154,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
     );
   }
 
-  if (devices.length === 0) {
+  if (devices.length === 0 && meta.total > 0) {
     return (
       <div className="flex flex-col items-center justify-center p-6 text-center">
         <p className="text-lg font-medium text-slate-700 dark:text-slate-200">No devices to display</p>
@@ -185,7 +191,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
               <p className="mt-3 text-sm text-sky-600 dark:text-sky-300">
                 Search results for "{searchTerm}"
                 <button
-                  onClick={() => setSearchParams({})}
+                  onClick={() => updateQuery({ search: "" })}
                   className="ml-3 text-slate-500 underline underline-offset-4 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 >
                   Clear
@@ -195,16 +201,14 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
           </div>
 
           <div className="rounded-[24px] bg-sky-50/70 p-4 ring-1 ring-sky-100 dark:bg-slate-800/80 dark:ring-slate-700">
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               <div>
                 <label className="mb-1 block text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">
                   Availability
                 </label>
                 <select
                   value={filters.availability}
-                  onChange={(e) =>
-                    setFilters((prev) => ({ ...prev, availability: e.target.value }))
-                  }
+                  onChange={(e) => updateQuery({ availability: e.target.value })}
                   className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                 >
                   <option value="all">All</option>
@@ -219,7 +223,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
                 </label>
                 <select
                   value={filters.brand}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, brand: e.target.value }))}
+                  onChange={(e) => updateQuery({ brand: e.target.value })}
                   className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                 >
                   <option value="all">All brands</option>
@@ -239,7 +243,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
                   type="number"
                   min="0"
                   value={filters.maxPrice}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
+                  onChange={(e) => updateQuery({ maxPrice: e.target.value })}
                   placeholder="e.g. 80000"
                   className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                 />
@@ -251,7 +255,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
                 </label>
                 <select
                   value={filters.minRam}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, minRam: e.target.value }))}
+                  onChange={(e) => updateQuery({ minRam: e.target.value })}
                   className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                 >
                   <option value="">Any</option>
@@ -262,6 +266,23 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
                   <option value="16">16 GB+</option>
                 </select>
               </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">
+                  Sort by
+                </label>
+                <select
+                  value={filters.sort}
+                  onChange={(e) => updateQuery({ sort: e.target.value })}
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                >
+                  <option value="relevance">Name</option>
+                  <option value="price_asc">Price: low to high</option>
+                  <option value="price_desc">Price: high to low</option>
+                  <option value="ram_desc">RAM: high to low</option>
+                  <option value="year_desc">Newest launch year</option>
+                </select>
+              </div>
             </div>
 
             <div className="mt-4 flex items-center justify-between">
@@ -270,14 +291,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
               </p>
               <button
                 type="button"
-                onClick={() =>
-                  setFilters({
-                    availability: "all",
-                    brand: "all",
-                    maxPrice: "",
-                    minRam: "",
-                  })
-                }
+                onClick={() => updateQuery({ availability: "all", brand: "all", maxPrice: "", minRam: "", sort: "relevance" })}
                 className="text-xs font-semibold text-sky-700 underline underline-offset-4 hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-200"
               >
                 Clear filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
@@ -304,7 +318,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
         )}
 
         <section>
-          {filteredDevices.length === 0 ? (
+          {meta.total === 0 ? (
             <div className="rounded-[28px] border border-slate-300 bg-slate-100/70 p-8 text-center dark:border-slate-800 dark:bg-slate-900/40">
               <p className="text-base font-medium text-slate-700 dark:text-slate-200">
                 No devices matched in {activeSection.label}.
@@ -316,7 +330,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
           ) : (
             <>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                {displayedDevices.map((device) => {
+                {devices.map((device) => {
                   const isSelected = selectedDevices.some((d) => d.id === device.id);
                   return (
                     <DeviceCard
@@ -334,10 +348,11 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
                 <div ref={loadMoreSentinelRef} className="mt-8 flex flex-col items-center justify-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setDisplayLimit((prev) => prev + BATCH_SIZE)}
+                    onClick={loadNextPage}
+                    disabled={loadingMore}
                     className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-sky-400 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-300"
                   >
-                    Load More Devices ({filteredDevices.length - displayedDevices.length} remaining)
+                    {loadingMore ? "Loading more devices…" : `Load More Devices (${Math.max(0, meta.total - devices.length)} remaining)`}
                   </button>
                 </div>
               )}

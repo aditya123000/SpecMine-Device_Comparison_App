@@ -131,6 +131,21 @@ const withSslFallback = async (operation) => {
 const query = (text, params = []) =>
   withSslFallback((activePool) => activePool.query(text, params));
 
+const withTransaction = (operation) => withSslFallback(async (activePool) => {
+  const client = await activePool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await operation(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw error;
+  } finally {
+    client.release();
+  }
+});
+
 const createDevicesTable = async () => {
   await query(`
     CREATE TABLE IF NOT EXISTS devices (
@@ -302,4 +317,5 @@ export {
   query,
   replaceDevicesFromJson,
   seedDevicesFromJson,
+  withTransaction,
 };

@@ -13,5 +13,4 @@ const findActiveSessionUser = async (token) => {
   return user ? { id: String(user.id), name: user.name, email: user.email, createdAt: user.created_at } : null;
 };
 const revokeSession = (token) => query("UPDATE user_sessions SET revoked_at = NOW() WHERE token_hash = $1 AND revoked_at IS NULL", [hashToken(token)]);
-const revokeUserSessions = (userId) => query("UPDATE user_sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL", [userId]);
-export { createSession, findActiveSessionUser, revokeSession, revokeUserSessions };
+export { createSession, findActiveSessionUser, revokeSession };

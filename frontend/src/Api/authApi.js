@@ -7,7 +7,7 @@ const parseJsonResponse = async (response) => {
     throw new Error(data.message ?? "Authentication request failed");
   }
 
-  return data;
+  return data.data ?? data;
 };
 
 const createAuthRequest = async (path, body, token) => {
@@ -19,7 +19,11 @@ const createAuthRequest = async (path, body, token) => {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const method = body ? (path === "/register" || path === "/login" ? "POST" : "PUT") : "GET";
+  const method = body
+    ? path === "/profile" || path === "/password"
+      ? "PUT"
+      : "POST"
+    : "GET";
 
   const response = await fetch(getApiUrl(`/api/auth${path}`), {
     method,
