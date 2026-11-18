@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {FiActivity,FiArrowRight,FiBarChart2,FiCheckCircle,FiCpu,FiLogOut,FiShield,FiSmartphone,FiZap} from "react-icons/fi";
 import SearchBar from "../components/Global-components/SearchBar";
 import FeatureCard from "../components/Global-components/FeatureCard";
-import { getDevices } from "../Api/deviceApi";
+import { getDevicePage } from "../Api/deviceApi";
 import { getDeviceById } from "../services/deviceServices";
 import { getRecentlyViewedIds } from "../utils/recentlyViewed";
 import { useAuth } from "../context/useAuth";
@@ -32,9 +32,9 @@ const Home = () => {
   const [recentDevices, setRecentDevices] = useState([]);
 
   const highlights = [
-    { label: "Devices Indexed", value: "500+" },
-    { label: "Spec Signals", value: "120+" },
-    { label: "Fast Compare", value: "< 2s" },
+    { label: "Device coverage", value: "Multiple categories" },
+    { label: "Comparison", value: "Up to 3 devices" },
+    { label: "Catalog", value: "Live PostgreSQL data" },
   ];
 
   const handleSearchSubmit = (query) => {
@@ -48,8 +48,8 @@ const Home = () => {
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        const res = await getDevices();
-        setDevices(res);
+        const { data } = await getDevicePage({ page: 1, limit: 100 });
+        setDevices(data);
       } catch (error) {
         console.error("Failed to fetch devices", error.message);
       }

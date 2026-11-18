@@ -12,7 +12,7 @@ try {
 
   await createDevicesTable();
   const count = await replaceDevicesFromJson();
-  console.log(`Replaced devices table with ${count} records from Data/db.json.`);
+  console.log(`Replaced devices table with ${count} records from data/db.json.`);
   process.exit(0);
 } catch (error) {
   console.error("Failed to seed devices:", error.message);

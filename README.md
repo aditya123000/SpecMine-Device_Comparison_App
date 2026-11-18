@@ -15,7 +15,7 @@ SpecMine is a modern, full-stack web application that lets users intelligently s
 - **Specification Completeness:** See how many source fields contain recorded values, without filling missing data with estimates.
 - **User Authentication:** Register and log in with database-backed opaque sessions and scrypt password hashing.
 - **Dark / Light Theme:** A class-based dark mode toggle powered by Tailwind CSS, with the preference persisted in `localStorage`.
-- **Responsive Design:** A Tailwind-powered UI that ensures a flawless experience on both desktop and mobile devices.
+- **Responsive Design:** Tailwind layouts support desktop and mobile browsing.
 
 ## Technology Stack
 
@@ -34,72 +34,34 @@ SpecMine is a modern, full-stack web application that lets users intelligently s
 | Backend Deployment | Render (or Vercel serverless) |
 | Database Hosting | Supabase |
 
+## Architecture
+
+```mermaid
+flowchart LR
+  Browser[React + Vite UI] -->|/api requests| API[Express REST API]
+  API --> Auth[Validation, auth, rate limits]
+  Auth --> Repositories[PostgreSQL repositories]
+  Repositories --> DB[(Supabase PostgreSQL)]
+  DB --> Catalog[Devices + JSONB payload]
+  DB --> Accounts[Users, sessions, favorites, saved comparisons]
+```
+
+The frontend uses the same `/api` paths in development and production. Vite proxies locally; deployments can route through the Vercel function or set `VITE_API_BASE_URL` to a separate API host. See [API documentation](docs/API_DOCUMENTATION.md) and [database schema](docs/DATABASE_SCHEMA.md).
+
 ## Project Structure
 
-```
-SpecMine-Compare-Devices/
-├── api/
-│   └── [...path].js          # Vercel serverless catch-all → Express app
-├── backend/
-│   ├── app.js                # Express app entry point
-│   ├── package.json          # Backend dependencies & scripts
-│   ├── .env.example          # Backend environment template
-│   ├── Config/
-│   │   └── db.js             # PostgreSQL Pool, table creation, auto-seeding
-│   ├── Controllers/
-│   │   ├── deviceController.js
-│   │   └── authController.js
-│   ├── Repositories/
-│   │   ├── deviceRepository.js
-│   │   └── userRepository.js
-│   ├── Routes/
-│   │   ├── deviceRoutes.js
-│   │   └── authRoutes.js
-│   ├── Middleware/
-│   │   ├── logger.js
-│   │   ├── notFound.js
-│   │   ├── errorHandler.js
-│   │   └── authMiddleware.js
-│   ├── Utils/
-│   │   ├── normalizeDevice.js
-│   │   ├── passwords.js       # scrypt hashing
-│   │   └── jwt.js            # Custom HS256 JWT
-│   ├── Scripts/
-│   │   ├── seedDevices.js
-│   │   └── importMobilesCsv.js
-│   └── Data/
-│       └── db.json           # Seed data
-├── frontend/
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js        # Vite config with /api proxy → localhost:8000
-│   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   ├── eslint.config.js
-│   └── src/
-│       ├── main.jsx
-│       ├── App.jsx            # Router & layout hierarchy
-│       ├── Api/               # apiBase.js, deviceApi.js, authApi.js
-│       ├── components/        # Navbar, Footer, SearchBar, DeviceImage, etc.
-│       ├── context/           # Auth, Theme, Compare contexts
-│       ├── pages/             # Home, Devices, Compare, Auth, DeviceDetails
-│       ├── services/          # Device detail fetch helpers
-│       └── utils/             # Shared value formatting helpers
-├── supabase/
-│   └── migrations/
-│       └── 001_initial_schema.sql
-├── vercel.json                # Vercel SPA routing config
-├── netlify.toml               # Netlify build & redirect config
-├── render.yaml                # Render backend service blueprint
-├── package.json               # Root monorepo scripts (concurrently)
-└── README.md
-```
+- `api/[...path].js` routes Vercel API requests to Express.
+- `backend/` contains the Express app, config, controllers, middleware, repositories, routes, scripts, tests, validators, utilities, and `data/db.json`.
+- `frontend/src/` contains the React API clients, components, contexts, pages, services, and utilities.
+- `supabase/migrations/` contains the versioned PostgreSQL schema changes.
+- `docs/API_DOCUMENTATION.md` and `docs/DATABASE_SCHEMA.md` document the implemented API and schema.
+- `render.yaml`, `vercel.json`, and `netlify.toml` contain deployment configuration for their respective targets.
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Node.js** v18+ (v22 recommended)
+- **Node.js** v22 (used by CI and the Render blueprint)
 - **PostgreSQL** database (local install or a Supabase project)
 
 ### Installation
@@ -129,11 +91,11 @@ SpecMine-Compare-Devices/
    ```bash
    cp backend/.env.example backend/.env
    ```
-   Configure `backend/.env` with your PostgreSQL credentials. The active auth flow uses database-backed sessions; `JWT_SECRET` remains only for an unused legacy helper. By default, the server connects via `host: localhost`, `port: 5432`, `user: postgres`, and `database: compare_devices`. Set `PGPASSWORD` to your local Postgres password.
+   Configure `backend/.env` with your PostgreSQL credentials. The active auth flow uses database-backed sessions; `JWT_SECRET` is only referenced by an unused legacy helper. By default, the server connects via `host: localhost`, `port: 5432`, `user: postgres`, and `database: compare_devices`. Set `PGPASSWORD` to your local Postgres password.
 
 6. **Set up the database:**
-   - Apply the SQL files in [`supabase/migrations`](supabase/migrations) in numeric order.
-   - The backend can create base tables for local development, but use versioned migrations to keep schema changes consistent.
+   - Apply the SQL files in [`supabase/migrations`](supabase/migrations) in numeric order before starting the application.
+   - Startup also runs idempotent table/index setup, but it does not track migration versions. Use the numbered migrations as the schema history, especially for hosted databases.
 
 7. **Start the development servers:**
    ```bash
@@ -157,6 +119,8 @@ SpecMine-Compare-Devices/
 > ```
 
 ## API Endpoints
+
+See [API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) for request parameters, validation rules, response and error formats, and examples.
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
@@ -212,7 +176,7 @@ Deploy the entire project as a single Vercel site. The frontend builds from `fro
 - **Environment variables (Vercel):**
   - `VITE_API_BASE_URL` — leave empty (same-origin)
   - `DATABASE_URL` — Supabase connection string
-  - `JWT_SECRET` — legacy helper only; the active auth flow does not use it
+  - `JWT_SECRET` — optional; referenced only by an unused legacy helper, not active authentication
   - `CORS_ORIGIN` — your Vercel URL(s)
   - `PG_SSL=true`
   - `AUTO_SEED_DB=false`
@@ -235,17 +199,17 @@ The [`vercel.json`](vercel.json) file handles SPA routing (filesystem-first, the
 - This repo includes [`render.yaml`](render.yaml) for the backend service.
 - Create a new Render Blueprint or Web Service from the repo.
 - Render should deploy from the `backend/` directory with:
-  - build command: `npm install`
+  - build command: `npm ci`
   - start command: `npm start`
 - Set these environment variables in Render:
   - `DATABASE_URL`
-  - `JWT_SECRET`
+  - `JWT_SECRET` (optional legacy helper; not used by active authentication)
   - `CORS_ORIGIN`
   - `PG_SSL=true`
   - `AUTO_SEED_DB=false`
 - Point `CORS_ORIGIN` to your Vercel site URL. You can also include localhost while testing, for example:
   - `http://localhost:5173,https://your-site.vercel.app`
-  - Add exact preview origins when needed. A wildcard such as `https://*.vercel.app` allows every Vercel preview domain.
+  - Add exact preview origins when needed; avoid broad wildcards for production unless every matching origin is trusted.
 
 #### 3. Vercel (Frontend)
 
@@ -260,7 +224,9 @@ The [`vercel.json`](vercel.json) file handles SPA routing (filesystem-first, the
 
 ### Alternative: Netlify (Frontend)
 
-The repo also includes [`netlify.toml`](netlify.toml) for Netlify deployment with the same build/redirect configuration.
+The repo also includes [`netlify.toml`](netlify.toml), configured to build and publish the frontend from `frontend/`. Netlify hosts only the frontend here; set `VITE_API_BASE_URL` to a separately deployed API (for example Render) and allow the Netlify origin in the backend's `CORS_ORIGIN`.
+
+These instructions describe repository configuration; no live Vercel, Render, Netlify, or Supabase deployment is claimed as verified by local checks.
 
 ## Available Scripts
 
@@ -270,6 +236,9 @@ The repo also includes [`netlify.toml`](netlify.toml) for Netlify deployment wit
 |---|---|
 | `npm run dev` | Start both backend and frontend concurrently (backend on `:8000`, frontend on `:5173`) |
 | `npm install` | Install root dev dependencies (`concurrently`) |
+| `npm test` | Run backend and frontend unit tests |
+| `npm run lint` | Run frontend ESLint |
+| `npm run build` | Build the production frontend |
 
 ### Backend (`backend/package.json`)
 
@@ -277,8 +246,8 @@ The repo also includes [`netlify.toml`](netlify.toml) for Netlify deployment wit
 |---|---|
 | `npm start` | Start backend server (`node app.js`) |
 | `npm run dev` | Start backend with auto-reload (`nodemon app.js`) |
-| `npm run seed` | Destructively replace all devices from `Data/db.json`; requires `SEED_REPLACE_CONFIRM=replace-device-catalog` |
-| `npm run import:mobiles` | Import phone data from a CSV file into `Data/db.json` |
+| `npm run seed` | Destructively replace all devices from `data/db.json`; requires `SEED_REPLACE_CONFIRM=replace-device-catalog` |
+| `npm run import:mobiles` | Import phone data from a CSV file into `data/db.json` |
 
 ### Frontend (`frontend/package.json`)
 
@@ -288,33 +257,11 @@ The repo also includes [`netlify.toml`](netlify.toml) for Netlify deployment wit
 | `npm run build` | Build production frontend to `dist/` |
 | `npm run preview` | Preview the production build |
 | `npm run lint` | Run ESLint |
+| `npm test` from the repository root | Run backend and frontend unit tests |
 
 ## Database Schema
 
-Defined in [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql):
-
-**`devices` table:**
-
-| Column | Type | Constraints |
-|---|---|---|
-| `id` | TEXT | PRIMARY KEY |
-| `brand` | TEXT | NOT NULL |
-| `model` | TEXT | NOT NULL |
-| `category` | TEXT | |
-| `price` | NUMERIC | |
-| `payload` | JSONB | NOT NULL |
-
-**`users` table:**
-
-| Column | Type | Constraints |
-|---|---|---|
-| `id` | BIGINT | GENERATED BY DEFAULT AS IDENTITY, PRIMARY KEY |
-| `name` | TEXT | NOT NULL |
-| `email` | TEXT | NOT NULL, UNIQUE |
-| `password_hash` | TEXT | NOT NULL |
-| `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() |
-
-> **Note:** The `devices` table retains common and legacy flat specification columns alongside a JSONB `payload`. Migration 002 fills missing payloads from existing columns without deleting catalog rows.
+The database contains `devices`, `users`, `user_sessions`, `user_favorites`, and `saved_comparisons`. See [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) for columns, foreign keys, indexes, migration behavior, and seed safety. Apply numbered SQL migrations in order before deploying. The backend performs idempotent startup table/index setup but does not track migration versions.
 
 ## Key Design Decisions
 
@@ -328,11 +275,11 @@ Defined in [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/00
 
 ## Future Roadmap
 
-- Advanced filtering modules (filter by exact specifications like price, RAM, or CPU power)
-- Device-specific user reviews, ratings, and community discussions
-- Deep integration for user accounts allowing saved cross-session device comparisons
-- Enhanced visual data charting for specification highlighting
-
+- Add valid-auth database integration tests and browser-level component tests.
+- Consider shared rate-limit storage if the API is deployed across multiple instances.
+- Measure catalog query plans at realistic data sizes before adding specialized indexes.
+- Evaluate safer browser session transport and token storage.
+- Add data provenance and a reviewed repeatable import/upsert workflow.
 ## Author
 
 **Aditya**  

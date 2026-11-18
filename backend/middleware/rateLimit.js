@@ -20,6 +20,7 @@ const createRateLimit = ({ windowMs = 60_000, max = 100, keyPrefix = "api" } = {
       res.setHeader("Retry-After", Math.ceil((bucket.resetAt - now) / 1000));
       return res.status(429).json({
         message: "Too many requests. Please try again shortly.",
+        code: "RATE_LIMITED",
         requestId: req.requestId,
       });
     }

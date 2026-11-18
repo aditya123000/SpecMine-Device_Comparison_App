@@ -3,13 +3,14 @@ import { Link, useSearchParams } from "react-router-dom";
 import { FaArrowRight, FaArrowUp, FaExclamationTriangle, FaPlus } from "react-icons/fa";
 import CompareTable from "./CompareComponents/CompareTable";
 import { useCompare } from "./context/useCompare";
-import { getDevices } from "../../Api/deviceApi";
+import { getDevicePage } from "../../Api/deviceApi";
 import SearchBar from "../../components/Global-components/SearchBar";
 import DeviceImage from "../../components/DeviceImage";
 import { getDeviceSectionKey, getSectionMeta } from "../devices/deviceSections";
 import { useAuth } from "../../context/useAuth";
 import { saveComparison } from "../../Api/libraryApi";
 import { getDeviceById } from "../../services/deviceServices";
+import { parseSharedComparisonIds } from "../../utils/comparisonLink";
 
 const buildPopularComparisons = (devices) => {
   const pairs = [];
@@ -43,6 +44,7 @@ const Compare = () => {
   const [allDevices, setAllDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [queryForApi, setQueryForApi] = useState("");
   const [activeSlot, setActiveSlot] = useState(0);
   const [saveState, setSaveState] = useState("");
   const [shareReady, setShareReady] = useState(false);
@@ -70,6 +72,11 @@ const Compare = () => {
   const activeSectionLabel = activeSectionKey ? getSectionMeta(activeSectionKey).label : null;
 
   useEffect(() => {
+    const timeoutId = window.setTimeout(() => setQueryForApi(query.trim()), 250);
+    return () => window.clearTimeout(timeoutId);
+  }, [query]);
+
+  useEffect(() => {
     if (initialShareLoadStarted.current) return;
     initialShareLoadStarted.current = true;
     const rawIds = initialSharedIds.current;
@@ -80,8 +87,8 @@ const Compare = () => {
 
     let cancelled = false;
     const loadSharedComparison = async () => {
-      const ids = [...new Set(rawIds.split(",").map((id) => id.trim()))];
-      if (ids.length < 2 || ids.length > 3 || ids.some((id) => !/^[a-zA-Z0-9_-]{1,80}$/.test(id))) {
+      const ids = parseSharedComparisonIds(rawIds);
+      if (!ids) {
         setSaveState("This comparison link is invalid. Choose devices and share a new link.");
         setShareReady(true);
         return;
@@ -115,19 +122,28 @@ const Compare = () => {
   }, [compareDevices, searchParams, setSearchParams, shareReady]);
 
   useEffect(() => {
+    let cancelled = false;
     const loadDevices = async () => {
       try {
-        setLoading(true);
-        const data = await getDevices();
-        setAllDevices(data);
+        const { data } = await getDevicePage({
+          page: 1,
+          limit: 100,
+          category: activeSectionKey || "",
+          q: queryForApi,
+        });
+        if (!cancelled) setAllDevices(data);
       } catch (error) {
-        console.error("Failed to fetch devices", error.message);
+        if (!cancelled) {
+          setAllDevices([]);
+          console.error("Failed to fetch devices", error.message);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     loadDevices();
-  }, []);
+    return () => { cancelled = true; };
+  }, [activeSectionKey, queryForApi]);
 
   const filteredDevices = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();

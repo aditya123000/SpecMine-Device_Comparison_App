@@ -39,21 +39,4 @@ const getDeviceBrands = async (category = "") => {
   return Array.isArray(brands) ? brands.filter((brand) => typeof brand === "string") : [];
 };
 
-// Keeps existing UI consumers simple while the API remains safely paginated.
-// New screens can use getDevicePage for server-driven pagination and filters.
-export const getDevices = async (params = {}) => {
-  const firstPage = await getDevicePage({ ...params, page: 1, limit: 100 });
-  const pageCount = Math.min(Number(firstPage.meta?.totalPages) || 1, 50);
-
-  if (pageCount === 1) return firstPage.data;
-
-  const remainingPages = await Promise.all(
-    Array.from({ length: pageCount - 1 }, (_, index) =>
-      getDevicePage({ ...params, page: index + 2, limit: 100 })
-    )
-  );
-
-  return firstPage.data.concat(...remainingPages.map((page) => page.data));
-};
-
 export { getDeviceBrands, getDevicePage };
