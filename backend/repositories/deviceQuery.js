@@ -1,5 +1,5 @@
 const MAX_PAGE_SIZE = 100;
-const MAX_PAGE = 1_000_000;
+const MAX_PAGE_OFFSET = 100_000;
 
 const CATEGORY_FILTERS = {
   phones: ["phones", "phone", "smartphone", "smartphones", "mobile", "mobiles", "cellphone"],
@@ -56,9 +56,11 @@ const sanitizeDeviceFilters = (query = {}) => {
   const sort = String(query.sort ?? "relevance").trim().toLowerCase();
   if (!Object.hasOwn(SORT_EXPRESSIONS, sort)) invalidQuery("Unsupported sort order");
 
+  const limit = parsePositiveInt(query.limit, 24, MAX_PAGE_SIZE);
+
   return {
-    page: parsePositiveInt(query.page, 1, MAX_PAGE),
-    limit: parsePositiveInt(query.limit, 24, MAX_PAGE_SIZE),
+    page: parsePositiveInt(query.page, 1, Math.floor(MAX_PAGE_OFFSET / limit) + 1),
+    limit,
     search: String(query.q ?? "").trim().slice(0, 100),
     category: String(query.category ?? "").trim().slice(0, 60),
     brand: String(query.brand ?? "").trim().slice(0, 60),
@@ -130,6 +132,7 @@ const buildDeviceBrandsQuery = (category = "") => {
 
 export {
   MAX_PAGE_SIZE,
+  MAX_PAGE_OFFSET,
   buildDeviceBrandsQuery,
   buildDeviceCatalogQuery,
   getCategoryFilterValues,

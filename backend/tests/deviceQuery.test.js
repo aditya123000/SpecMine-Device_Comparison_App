@@ -22,6 +22,12 @@ test("sanitizeDeviceFilters rejects invalid pagination, filter, and sort values"
   assert.throws(() => sanitizeDeviceFilters({ sort: "brand desc; DROP TABLE devices" }), /Unsupported sort/);
 });
 
+test("sanitizeDeviceFilters caps the database offset based on page size", () => {
+  const filters = sanitizeDeviceFilters({ page: "999999", limit: "100" });
+  assert.equal(filters.page, 1001);
+  assert.equal((filters.page - 1) * filters.limit, 100_000);
+});
+
 test("buildDeviceCatalogQuery parameterizes catalog filters", () => {
   const query = buildDeviceCatalogQuery(sanitizeDeviceFilters({
     q: "Galaxy",
