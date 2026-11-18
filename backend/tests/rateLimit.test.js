@@ -32,3 +32,20 @@ test("rate limit emits a consistent coded 429 after the configured request count
   });
   assert.equal(second.result.headers["Retry-After"] > 0, true);
 });
+
+test("rate limiter bounds the number of remembered client buckets", () => {
+  const limit = createRateLimit({ windowMs: 60_000, max: 1, maxKeys: 2, keyPrefix: `bounded-${Math.random()}` });
+
+  for (const ip of ["127.0.0.1", "127.0.0.2"]) {
+    const response = responseDouble();
+    let nextCalls = 0;
+    limit({ ip }, response, () => { nextCalls += 1; });
+    assert.equal(nextCalls, 1);
+  }
+
+  limit({ ip: "127.0.0.3" }, responseDouble(), () => {});
+  const evictedClient = responseDouble();
+  let nextCalls = 0;
+  limit({ ip: "127.0.0.1" }, evictedClient, () => { nextCalls += 1; });
+  assert.equal(nextCalls, 1);
+});
