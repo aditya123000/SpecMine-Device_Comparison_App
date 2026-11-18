@@ -6,7 +6,7 @@ const logger = (req, res, next) => {
       event: "http_request",
       requestId: req.requestId,
       method: req.method,
-      path: req.originalUrl,
+      path: req.path,
       statusCode: res.statusCode,
       durationMs: Math.round(performance.now() - startedAt),
     }));
