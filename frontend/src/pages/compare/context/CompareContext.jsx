@@ -48,7 +48,7 @@ export const CompareProvider = ({ children }) => {
     }
   };
 
-  const setComparedDevices = (devices) => {
+  const setComparedDevices = useCallback((devices) => {
     const valid = (devices || []).filter((d) => d && typeof d === "object");
     if (!valid.length) {
       setSelectedDevices([]);
@@ -67,7 +67,7 @@ export const CompareProvider = ({ children }) => {
     }
 
     setSelectedDevices(sameSectionDevices.slice(0, 3));
-  };
+  }, [showError]);
 
   const replaceComparedDeviceAt = (index, device) => {
     if (!device || typeof device !== "object") return;

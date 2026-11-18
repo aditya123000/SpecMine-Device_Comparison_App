@@ -2,14 +2,17 @@
 
 SpecMine is a modern, full-stack web application that lets users intelligently search, explore, and compare the technical specifications of electronic devices. It bridges the gap between complex hardware details and a clean, user-friendly interface, simplifying the consumer decision-making process.
 
-> **Production-minded foundation:** SpecMine includes a paginated catalog API, parameterized database access, request correlation IDs, JSON observability logs, hardened headers, per-route rate limits, database-backed health checks, database indexes, automated tests, and a GitHub Actions quality gate. See [architecture notes](docs/ARCHITECTURE.md).
+> **Production-minded foundation:** SpecMine includes a paginated catalog API, parameterized database access, request correlation IDs, JSON observability logs, hardened headers, per-route rate limits, database-backed health checks, database indexes, automated tests, and a GitHub Actions quality gate.
 
 ## Key Features
 
 - **Advanced Device Search:** Quickly locate specific devices by brand name, model number, or product category using an interactive search bar with live autocomplete suggestions.
 - **Multi-Category Browsing:** Seamlessly navigate through six categories — Smartphones, Laptops, Tablets, Earbuds, Headphones, and Televisions — each with dedicated pages and sidebar navigation.
 - **Side-by-Side Comparisons:** Compare up to three devices simultaneously with a detailed spec table that highlights the "best value" for each specification (e.g., highest RAM, lowest price) using a custom heuristic scoring engine.
+- **Shareable Comparisons:** Share a comparison URL that restores up to three devices and handles unavailable catalog entries gracefully.
+- **Recently Viewed:** Revisit the eight most recent device details on the same browser, stored as a versioned list of IDs.
 - **Detailed Specifications:** Access structured data for every device, covering processor/chipset, RAM/storage, display, battery, camera, connectivity, and more.
+- **Specification Completeness:** See how many source fields contain recorded values, without filling missing data with estimates.
 - **User Authentication:** Register and log in with database-backed opaque sessions and scrypt password hashing.
 - **Dark / Light Theme:** A class-based dark mode toggle powered by Tailwind CSS, with the preference persisted in `localStorage`.
 - **Responsive Design:** A Tailwind-powered UI that ensures a flawless experience on both desktop and mobile devices.

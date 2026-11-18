@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { FaArrowRight, FaArrowUp, FaExclamationTriangle, FaPlus } from "react-icons/fa";
 import CompareTable from "./CompareComponents/CompareTable";
 import { useCompare } from "./context/useCompare";
@@ -9,6 +9,7 @@ import DeviceImage from "../../components/DeviceImage";
 import { getDeviceSectionKey, getSectionMeta } from "../devices/deviceSections";
 import { useAuth } from "../../context/useAuth";
 import { saveComparison } from "../../Api/libraryApi";
+import { getDeviceById } from "../../services/deviceServices";
 
 const buildPopularComparisons = (devices) => {
   const pairs = [];
@@ -44,6 +45,10 @@ const Compare = () => {
   const [query, setQuery] = useState("");
   const [activeSlot, setActiveSlot] = useState(0);
   const [saveState, setSaveState] = useState("");
+  const [shareReady, setShareReady] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSharedIds = useRef(searchParams.get("devices"));
+  const initialShareLoadStarted = useRef(false);
   const { token, isAuthenticated } = useAuth();
 
   const compareDevices = useMemo(() => selectedDevices.filter(Boolean), [selectedDevices]);
@@ -63,6 +68,51 @@ const Compare = () => {
   }, [compareDevices]);
 
   const activeSectionLabel = activeSectionKey ? getSectionMeta(activeSectionKey).label : null;
+
+  useEffect(() => {
+    if (initialShareLoadStarted.current) return;
+    initialShareLoadStarted.current = true;
+    const rawIds = initialSharedIds.current;
+    if (!rawIds) {
+      setShareReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    const loadSharedComparison = async () => {
+      const ids = [...new Set(rawIds.split(",").map((id) => id.trim()))];
+      if (ids.length < 2 || ids.length > 3 || ids.some((id) => !/^[a-zA-Z0-9_-]{1,80}$/.test(id))) {
+        setSaveState("This comparison link is invalid. Choose devices and share a new link.");
+        setShareReady(true);
+        return;
+      }
+
+      const devices = await Promise.all(ids.map((id) => getDeviceById(id)));
+      if (cancelled) return;
+      const available = devices.filter(Boolean);
+      setComparedDevices(available);
+      if (available.length !== ids.length) {
+        setSaveState("Some devices in this shared comparison are no longer available.");
+      }
+      setShareReady(true);
+    };
+
+    loadSharedComparison().catch(() => {
+      if (!cancelled) {
+        setSaveState("Could not load the shared comparison. Please try again.");
+        setShareReady(true);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [setComparedDevices]);
+
+  useEffect(() => {
+    if (!shareReady) return;
+    const next = new URLSearchParams(searchParams);
+    if (compareDevices.length >= 2) next.set("devices", compareDevices.map((device) => device.id).join(","));
+    else next.delete("devices");
+    if (next.toString() !== searchParams.toString()) setSearchParams(next, { replace: true });
+  }, [compareDevices, searchParams, setSearchParams, shareReady]);
 
   useEffect(() => {
     const loadDevices = async () => {
@@ -160,6 +210,17 @@ const Compare = () => {
     } catch (error) { setSaveState(error.message); }
   };
 
+  const handleShareComparison = async () => {
+    const shareUrl = new URL(window.location.href);
+    shareUrl.searchParams.set("devices", compareDevices.map((device) => device.id).join(","));
+    try {
+      await navigator.clipboard.writeText(shareUrl.toString());
+      setSaveState("Comparison link copied.");
+    } catch {
+      setSaveState(shareUrl.toString());
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* 1. Comparison Results Section at the TOP */}
@@ -182,6 +243,7 @@ const Compare = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button type="button" disabled={!canCompare} onClick={handleShareComparison} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-400 hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 dark:text-slate-200 dark:hover:text-sky-300">Share link</button>
             <button type="button" disabled={!canCompare} onClick={handleSaveComparison} className="rounded-lg border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-400/20 disabled:cursor-not-allowed disabled:opacity-40 dark:text-sky-300">Save comparison</button>
             <a
               href="#device-selector"

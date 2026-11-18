@@ -4,6 +4,8 @@ import {FiActivity,FiArrowRight,FiBarChart2,FiCheckCircle,FiCpu,FiLogOut,FiShiel
 import SearchBar from "../components/Global-components/SearchBar";
 import FeatureCard from "../components/Global-components/FeatureCard";
 import { getDevices } from "../Api/deviceApi";
+import { getDeviceById } from "../services/deviceServices";
+import { getRecentlyViewedIds } from "../utils/recentlyViewed";
 import { useAuth } from "../context/useAuth";
 
 const AUTH_TOAST_STORAGE_KEY = "auth_toast";
@@ -27,6 +29,7 @@ const Home = () => {
   const [devices, setDevices] = useState([]);
   const [activeDeviceTypeIndex, setActiveDeviceTypeIndex] = useState(0);
   const [authToast, setAuthToast] = useState(null);
+  const [recentDevices, setRecentDevices] = useState([]);
 
   const highlights = [
     { label: "Devices Indexed", value: "500+" },
@@ -52,6 +55,19 @@ const Home = () => {
       }
     };
     fetchDevices();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadRecentlyViewed = async () => {
+      const ids = getRecentlyViewedIds();
+      const records = await Promise.all(ids.map((id) => getDeviceById(id)));
+      if (!cancelled) setRecentDevices(records.filter(Boolean));
+    };
+    loadRecentlyViewed().catch(() => {
+      if (!cancelled) setRecentDevices([]);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -247,6 +263,23 @@ const Home = () => {
           description="Use clear data points to choose the right device for your budget and needs."
         />
       </section>
+
+      {recentDevices.length > 0 && (
+        <section className="space-y-4" aria-labelledby="recent-devices-heading">
+          <div>
+            <h2 id="recent-devices-heading" className="text-2xl font-bold text-slate-900 dark:text-slate-100">Recently viewed</h2>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Your last device details, saved on this browser.</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {recentDevices.map((device) => (
+              <Link key={device.id} to={`/devices/${device.id}`} className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-sky-400 dark:border-slate-700 dark:bg-slate-800/70">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{device.brand || "Device"}</p>
+                <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">{device.model}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 dark:border-slate-700 dark:bg-slate-800/50 md:p-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">

@@ -15,6 +15,7 @@ import { useCompare } from "../compare/context/useCompare";
 import { getDeviceSectionKey } from "../devices/deviceSections";
 import { getDeviceById } from "../../services/deviceServices";
 import { formatDeviceValue, formatSpecValue } from "../../utils/formatDeviceValue";
+import { recordRecentlyViewed } from "../../utils/recentlyViewed";
 
 const EXCLUDED_SPEC_KEYS = [
   "id",
@@ -32,6 +33,15 @@ const formatLabel = (key) =>
   key
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (char) => char.toUpperCase());
+
+const hasRecordedValue = (value) => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (Array.isArray(value)) return value.some(hasRecordedValue);
+  if (typeof value === "object") return Object.values(value).some(hasRecordedValue);
+  return true;
+};
 
 const SPEC_GROUPS = [
   {
@@ -88,6 +98,7 @@ const DeviceDetailsPage = () => {
       setLoading(true);
       const data = await getDeviceById(id);
       setDevice(data);
+      if (data) recordRecentlyViewed(data.id);
       setLoading(false);
     };
 
@@ -142,6 +153,10 @@ const DeviceDetailsPage = () => {
     if (!device) return [];
     return Object.entries(device).filter(([key]) => !EXCLUDED_SPEC_KEYS.includes(key));
   }, [device]);
+  const completeness = useMemo(() => {
+    const knownSpecs = specs.filter(([, value]) => hasRecordedValue(value));
+    return { available: knownSpecs.length, total: specs.length };
+  }, [specs]);
 
   if (loading) {
     return <Spinner loading={loading} />;
@@ -250,6 +265,10 @@ const DeviceDetailsPage = () => {
               REV 2.4
             </div>
           </div>
+
+          <p className="mb-5 text-sm text-slate-600 dark:text-slate-400" aria-label="Specification completeness">
+            {completeness.available} of {completeness.total} specification fields have recorded values.
+          </p>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2 2xl:grid-cols-4">
             {specGroups.map((group) => {
