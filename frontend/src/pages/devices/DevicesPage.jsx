@@ -27,11 +27,16 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
   const [devices, setDevices] = useState([]);
   const [availableBrands, setAvailableBrands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [meta, setMeta] = useState({ page: 1, limit: BATCH_SIZE, total: 0, totalPages: 0 });
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const searchParamsRef = useRef(searchParams);
+  useEffect(() => {
+    searchParamsRef.current = searchParams;
+  }, [searchParams]);
   const { selectedDevices, toggleCompare } = useCompare();
   const searchTerm = searchParams.get("search")?.trim() || "";
   const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1);
@@ -44,6 +49,15 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
   };
   const activeSection = getSectionMeta(sectionKey);
   const loadMoreSentinelRef = useRef(null);
+  const priceCommitTimerRef = useRef(null);
+  const hasLoadedCatalogRef = useRef(false);
+  const [maxPriceDraft, setMaxPriceDraft] = useState(filters.maxPrice);
+
+  useEffect(() => {
+    setMaxPriceDraft(filters.maxPrice);
+  }, [filters.maxPrice]);
+
+  useEffect(() => () => window.clearTimeout(priceCommitTimerRef.current), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +76,10 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
   useEffect(() => {
     let cancelled = false;
     const fetchPage = async () => {
-      if (page === 1) setLoading(true);
+      if (page === 1) {
+        if (hasLoadedCatalogRef.current) setRefreshing(true);
+        else setLoading(true);
+      }
       else setLoadingMore(true);
       try {
         const result = await getDevicePage({
@@ -84,7 +101,9 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
         if (!cancelled) setLoadError(getDeviceLoadErrorMessage());
       } finally {
         if (!cancelled) {
+          hasLoadedCatalogRef.current = true;
           setLoading(false);
+          setRefreshing(false);
           setLoadingMore(false);
         }
       }
@@ -93,20 +112,28 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
     return () => { cancelled = true; };
   }, [activeSection.key, page, searchTerm, filters.availability, filters.brand, filters.maxPrice, filters.minRam, filters.sort]);
 
-  const hasMore = page < meta.totalPages;
+  const hasMore = !refreshing && page < meta.totalPages;
 
   const updateQuery = (updates) => {
-    const next = new URLSearchParams(searchParams);
+    const currentParams = searchParamsRef.current;
+    const next = new URLSearchParams(currentParams);
     const defaults = { availability: "all", brand: "all", sort: "relevance" };
     for (const [key, value] of Object.entries(updates)) {
       if (value === "" || value === undefined || value === defaults[key]) next.delete(key);
       else next.set(key, String(value));
     }
     next.delete("page");
-    setDevices([]);
-    setMeta({ page: 1, limit: BATCH_SIZE, total: 0, totalPages: 0 });
-    setLoading(true);
+    if (next.toString() === currentParams.toString()) return;
+    setRefreshing(true);
     setSearchParams(next, { replace: true });
+  };
+
+  const handleMaxPriceChange = (value) => {
+    setMaxPriceDraft(value);
+    window.clearTimeout(priceCommitTimerRef.current);
+    priceCommitTimerRef.current = window.setTimeout(() => {
+      updateQuery({ maxPrice: value });
+    }, 400);
   };
 
   const loadNextPage = useCallback(() => {
@@ -145,7 +172,7 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
     return <Spinner loading={loading} />;
   }
 
-  if (loadError) {
+  if (loadError && devices.length === 0 && meta.total === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-6 text-center">
         <p className="text-lg font-medium text-slate-700 dark:text-slate-200">Unable to load devices</p>
@@ -242,8 +269,8 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
                 <input
                   type="number"
                   min="0"
-                  value={filters.maxPrice}
-                  onChange={(e) => updateQuery({ maxPrice: e.target.value })}
+                  value={maxPriceDraft}
+                  onChange={(e) => handleMaxPriceChange(e.target.value)}
                   placeholder="e.g. 80000"
                   className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 outline-none focus:border-sky-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                 />
@@ -291,7 +318,11 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
               </p>
               <button
                 type="button"
-                onClick={() => updateQuery({ availability: "all", brand: "all", maxPrice: "", minRam: "", sort: "relevance" })}
+                onClick={() => {
+                  window.clearTimeout(priceCommitTimerRef.current);
+                  setMaxPriceDraft("");
+                  updateQuery({ availability: "all", brand: "all", maxPrice: "", minRam: "", sort: "relevance" });
+                }}
                 className="text-xs font-semibold text-sky-700 underline underline-offset-4 hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-200"
               >
                 Clear filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
@@ -318,6 +349,12 @@ const DevicesPage = ({ sectionKey = "phones" }) => {
         )}
 
         <section>
+          {loadError && (
+            <p role="status" className="mb-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">{loadError}</p>
+          )}
+          {refreshing && (
+            <p role="status" className="mb-4 text-sm text-slate-500 dark:text-slate-400">Updating results…</p>
+          )}
           {meta.total === 0 ? (
             <div className="rounded-[28px] border border-slate-300 bg-slate-100/70 p-8 text-center dark:border-slate-800 dark:bg-slate-900/40">
               <p className="text-base font-medium text-slate-700 dark:text-slate-200">

@@ -20,9 +20,10 @@ test("getDevicePage serializes filters and unwraps the standard response envelop
     assert.equal(parsed.pathname, "/api/devices");
     assert.equal(parsed.searchParams.get("q"), "Pixel & Pro");
     assert.equal(parsed.searchParams.get("page"), "2");
+    assert.equal(parsed.searchParams.get("maxPrice"), "80000");
     return jsonResponse({ data: [{ id: 1 }, null, "invalid"], meta: { page: 2, totalPages: 4 } });
   }, async () => {
-    assert.deepEqual(await getDevicePage({ page: 2, q: "Pixel & Pro", ignored: "" }), {
+    assert.deepEqual(await getDevicePage({ page: 2, q: "Pixel & Pro", maxPrice: "80000", ignored: "" }), {
       data: [{ id: 1 }],
       meta: { page: 2, totalPages: 4 },
     });
